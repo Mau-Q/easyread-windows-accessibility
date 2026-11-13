@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>NSDesktopFolderUsageDescription</key><string>EasyRead 需要读取桌面 toys 中的本地程序、论文和笔记。</string>
+  <key>NSDownloadsFolderUsageDescription</key><string>EasyRead 需要读取你选择导入的 PDF，并保存导出的笔记。</string>
+</dict></plist>

@@ -1,0 +1,13 @@
+title = "EasyRead public source scan"
+[extend]
+useDefault = true
+
+# One verified code-only false positive, scoped to exact expression and path.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Exact vendored array-length assignment, not a credential"
+condition = "AND"
+regexTarget = "match"
+paths = ['''(^|/)easyread/web/vendor/zotero/reader\.js$''']
+regexes = ['''^this\.keys\.length,i=this\.children\.length;$''']

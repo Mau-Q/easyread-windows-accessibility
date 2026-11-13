@@ -1,0 +1,6 @@
+{
+  "port": 8765,
+  "engine": "none",
+  "auto_translate": false,
+  "openai": {"preset": "", "base_url": "", "api_key": "", "model": "", "vision": false, "timeout": 600}
+}

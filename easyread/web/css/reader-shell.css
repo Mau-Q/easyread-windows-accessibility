@@ -1,0 +1,73 @@
+/* Interface palette stays independent of the paper palette. Loaded only by two readers. */
+:root[data-reader-theme]:not([data-theme=dark]){--bg:#f7f6f3;--surface:#fff;--surface-2:#eeefec;--ink:#262a2b;--ink-2:#535b5e;--ink-3:#687073;--rule:#dedfdb;--rule-2:#c9ceca;--accent:#2b6674;--accent-soft:rgba(43,102,116,.07);--accent-soft-2:rgba(43,102,116,.12);color-scheme:light}
+:root[data-reader-theme][data-theme=dark]{--bg:#1d1e20;--surface:#252629;--surface-2:#303236;--ink:#ececea;--ink-2:#c5c8c9;--ink-3:#a6adaf;--rule:#3a3c3f;--rule-2:#50555a;--accent:#91c5d1;--accent-soft:rgba(145,197,209,.07);--accent-soft-2:rgba(145,197,209,.13);color-scheme:dark}
+body.reader-shell{font-family:var(--ui);color:var(--ink);background:var(--reading-bg,var(--bg))}
+.reader-shell .reader-bar,.reader-shell.controls-hidden .reader-bar{display:flex;position:fixed;top:0;left:0;right:0;height:52px;min-height:52px;padding:8px 16px;gap:8px;flex-wrap:nowrap;z-index:600;background:var(--surface);color:var(--ink);border:0;border-bottom:1px solid var(--rule);box-shadow:0 4px 18px #0001;transform:translateY(0);visibility:visible;transition:transform 160ms ease,visibility 160ms}
+.reader-shell.controls-hidden .reader-bar{transform:translateY(-105%);visibility:hidden;pointer-events:none}
+.reader-shell .reader-title,.reader-shell .dualbar #paperTitle{font:600 13px var(--ui);color:var(--ink);flex:1;min-width:0;max-width:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0 12px}
+.reader-shell .reader-mode{font-size:12px;color:var(--ink-3);white-space:nowrap;margin-right:8px}
+.reader-shell button,.reader-shell .btn,.reader-shell input,.reader-shell select,.reader-shell summary{font:13px var(--ui);color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:7px;min-height:32px;padding:5px 10px;white-space:nowrap}
+.reader-shell .reader-bar>button,.reader-shell .reader-bar>.btn{background:transparent;border-color:transparent}
+.reader-shell button:hover,.reader-shell .btn:hover,.reader-shell summary:hover{background:var(--surface-2)}
+.reader-shell .reader-more{position:relative;flex-shrink:0}
+.reader-shell summary{list-style:none;cursor:pointer;font-size:20px;padding:0 10px;text-align:center}
+.reader-shell summary::-webkit-details-marker{display:none}
+.reader-shell .reader-menu{position:absolute;right:0;top:42px;width:360px;max-width:calc(100vw - 24px);padding:16px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:12px;box-shadow:0 8px 32px #0003}
+.reader-shell .menu-label{flex-basis:100%;font-size:12px;color:var(--ink-3);font-weight:500}
+.reader-shell .reader-menu .actions{flex:1 1 100%;display:flex;flex-wrap:wrap;gap:8px;order:0;font-size:12px}
+.reader-shell .reader-menu #saveState{font-size:11px;flex:1;color:var(--ink-3)}
+.reader-shell #nativeTranslationTools{position:static;display:flex;flex-wrap:wrap;padding:0;background:transparent;color:var(--ink);max-width:100%;font-size:12px}
+.reader-shell.controls-hidden #nativeTranslationTools{display:flex}
+.reader-shell #readingControls{position:fixed;top:8px;right:12px;width:28px;height:28px;min-height:28px;padding:0;border-radius:7px;font-size:16px;z-index:590;opacity:.15;box-shadow:none;background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.reader-shell #readingControls:hover,.reader-shell #readingControls:focus-visible{opacity:1}
+.reader-shell:not(.controls-hidden) #readingControls{visibility:hidden}
+.reader-edge{position:fixed;inset:0 0 auto;height:8px;z-index:580}
+.reader-shell #workspace,.reader-shell .web-stage{height:100%;flex:1;min-height:0}
+.reader-shell #notespanel,.reader-shell #chatpanel,.reader-shell .web-stage .side-panel{position:absolute;top:0;bottom:0;right:0;inset-inline-start:auto;width:400px;max-width:92vw;height:100%;flex:none;transform:none;background:var(--surface);color:var(--ink);border-left:1px solid var(--rule);z-index:400;box-shadow:-8px 0 32px #0002}
+.reader-shell .side-panel .np-head,.reader-shell .side-panel .ch-head{background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.reader-shell #readerThemePicker,.reader-shell #selectionTools{background:var(--surface);color:var(--ink);border-color:var(--rule)}
+.reader-shell #translationTools{position:fixed;top:60px;right:16px;max-width:calc(100vw - 32px);z-index:610;padding:12px;background:var(--surface);color:var(--ink);border:1px solid var(--rule);border-radius:12px;box-shadow:0 8px 24px #0002}
+.reader-shell #translationTools[hidden]{display:none}
+.reader-shell #status:empty{display:none}
+@media(max-width:700px){.reader-shell .reader-bar{padding:8px;gap:2px}.reader-shell .reader-title{margin:0 4px}.reader-shell .reader-mode{display:none}.reader-shell .reader-bar>button,.reader-shell .reader-bar>.btn{padding:5px 7px}.reader-shell .reader-title{max-width:30vw}}
+.reader-shell #pdfPanes{position:relative;grid-template-columns:minmax(0,var(--split-ratio,50%)) minmax(0,1fr);gap:1px}
+.reader-shell.source-only #pdfPanes{grid-template-columns:minmax(0,1fr) 250px}
+.reader-divider{position:absolute;top:0;bottom:0;left:var(--split-ratio,50%);width:10px;transform:translateX(-50%);z-index:100;cursor:col-resize;background:transparent;touch-action:none}
+.reader-divider:hover,.reader-divider:focus-visible{background:var(--accent-soft-2);outline:0;border-inline:1px solid var(--accent)}
+.source-only .reader-divider{display:none}
+.reader-resizing iframe{pointer-events:none}.reader-resizing{cursor:col-resize;user-select:none}
+/* Leave the panel's close/list buttons accessible beneath the overlay toolbar. */
+.reader-shell #notespanel,.reader-shell #chatpanel,.reader-shell .web-stage .side-panel{top:52px;height:calc(100% - 52px)}
+.reader-shell #chatpanel .ch-scroll{min-height:0}
+.reader-shell .reader-mode-menu>summary{font:12px var(--ui);color:var(--ink-3);border-color:transparent;background:transparent;padding:7px 8px}
+.reader-shell .reader-mode-menu .reader-menu{width:180px;display:flex;flex-direction:column;align-items:stretch;padding:8px}
+.reader-shell.ch-open #chatpanel{display:flex;flex-direction:column;overflow:hidden}
+.reader-shell .side-panel,.reader-shell .ch-empty b,.reader-shell .np-head,.reader-shell .ch-head{font-family:var(--ui)}
+/* Selection controls need their own sizes and saturated color swatches. */
+:root{--selection-ui-bg:#fff;--selection-ui-ink:#262a2b;--selection-ui-soft:#eeefec;--selection-ui-rule:#dedfdb}
+:root[data-theme=dark]{--selection-ui-bg:#252629;--selection-ui-ink:#ececea;--selection-ui-soft:#303236;--selection-ui-rule:#3a3c3f}
+:root .reader-shell :is(#selbar,#selectionTools){--surface:var(--selection-ui-bg);--ink:var(--selection-ui-ink);--ink-2:var(--selection-ui-ink);--ink-3:var(--selection-ui-ink);--rule:var(--selection-ui-rule);background:var(--selection-ui-bg);color:var(--selection-ui-ink);border-color:var(--selection-ui-rule)}
+.reader-shell :is(#selbar,#selectionTools) .pens{background:var(--selection-ui-soft);padding:2px;gap:2px}
+.reader-shell :is(#selbar,#selectionTools) .pens button{width:28px;height:28px;min-height:28px;padding:0;border:0;background:transparent;color:var(--selection-ui-ink);display:grid;place-items:center}
+.reader-shell :is(#selbar,#selectionTools) .pens button.on{background:var(--selection-ui-bg);color:var(--selection-ui-ink);box-shadow:0 0 0 1px var(--selection-ui-rule)}
+.reader-shell :is(#selbar,#selectionTools) .dots{display:inline-flex;height:28px;align-items:center;gap:8px;padding:0 8px}
+.reader-shell :is(#selbar,#selectionTools) .dots button{width:16px;height:16px;min-height:16px;padding:0;margin:0;border:0;border-radius:50%;background:var(--selection-color);box-shadow:inset 0 0 0 1px #0002}
+.reader-shell :is(#selbar,#selectionTools) .dot-yellow{--selection-color:#ecc45c}.reader-shell :is(#selbar,#selectionTools) .dot-green{--selection-color:#7eb576}.reader-shell :is(#selbar,#selectionTools) .dot-blue{--selection-color:#6ea0d6}.reader-shell :is(#selbar,#selectionTools) .dot-pink{--selection-color:#e25c5c}
+.reader-shell :is(#selbar,#selectionTools) .dots.pen-underline button{height:5px;min-height:5px;border-radius:2px}
+.reader-shell :is(#selbar,#selectionTools) .dots button:hover{background:var(--selection-color);transform:scale(1.12)}
+.reader-shell.controls-hidden :is(#notespanel,#chatpanel),.reader-shell.controls-hidden .web-stage .side-panel{top:0;height:100%}
+
+/* PDF layout switch keeps both loaded assets and their annotation coordinates. */
+.reader-shell #pdfLayout{display:inline-flex;flex:none;gap:2px;border:1px solid var(--rule);border-radius:18px;padding:2px;background:var(--bg)}
+.reader-shell #pdfLayout button{min-height:28px;border:0;border-radius:14px;padding:4px 12px;background:transparent;color:var(--ink-3)}
+.reader-shell #pdfLayout button[aria-pressed=true]{background:var(--surface-2);color:var(--ink);font-weight:600}
+.reader-shell #pdfLayout button:disabled{opacity:.4;cursor:default}
+.reader-shell:is(.pdf-layout-source,.pdf-layout-translation) #pdfPanes{grid-template-columns:minmax(0,1fr)}
+.reader-shell.pdf-layout-source .pane[data-side=translation],.reader-shell.pdf-layout-translation .pane[data-side=source],.reader-shell:is(.pdf-layout-source,.pdf-layout-translation) .reader-divider{display:none}
+.reader-shell.np-open #notespanel{display:flex;flex-direction:column;overflow:hidden}
+.reader-shell #notespanel .np-head{flex:none;position:relative;z-index:1}
+.reader-shell #notespanel .np-list{min-height:0;overflow-y:auto}
+.reader-shell #notespanel .card .edit-acts{flex-wrap:wrap}
+.reader-shell #notespanel .card .hint{white-space:normal;font-size:11px}
+
+.reader-shell:is(.np-open,.ch-open) #readingControls{visibility:hidden}

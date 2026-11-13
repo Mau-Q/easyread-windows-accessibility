@@ -1,0 +1,54 @@
+/* 核心背景/文字取自 Zotero；辅助色适配 EasyRead 的链接、边线和批注。 */
+:root[data-reader-theme] {
+  --reading-bg:#FFFFFF; --reading-fg:#000000; --reading-link:#0055AA; --reading-image-filter:none;
+  --reading-muted:color-mix(in srgb, var(--reading-fg) 80%, var(--reading-bg));
+  --reading-rule:color-mix(in srgb, var(--reading-fg) 22%, var(--reading-bg));
+  --reading-surface:color-mix(in srgb, var(--reading-fg) 4%, var(--reading-bg));
+  --reading-soft:color-mix(in srgb, var(--reading-link) 10%, transparent);
+  --reading-hl-yellow:rgba(236,196,92,.28); --reading-hl-green:rgba(126,181,118,.24);
+  --reading-hl-blue:rgba(110,160,214,.23); --reading-hl-pink:rgba(226,92,92,.20);
+  --reading-ul-yellow:#b78718; --reading-ul-green:#5b9a52; --reading-ul-blue:#4a82c3; --reading-ul-pink:#d0473f;
+}
+:root[data-reader-theme="dark"] { --reading-bg:#2E3440; --reading-fg:#D8DEE9; --reading-link:#88C0D0; --reading-image-filter:brightness(.85); }
+:root[data-reader-theme="black"] { --reading-bg:#000000; --reading-fg:#FFFFFF; --reading-link:#9AC7FF; --reading-image-filter:invert(1); }
+:root[data-reader-theme="snow"] { --reading-bg:#ECEFF4; --reading-fg:#3B4252; --reading-link:#3B6C93; }
+:root[data-reader-theme="sepia"] { --reading-bg:#F4ECD8; --reading-fg:#5B4636; --reading-link:#77573B; }
+:root[data-reading-tone="dark"] {
+  --reading-hl-yellow:rgba(216,163,92,.22); --reading-hl-green:rgba(126,181,118,.20);
+  --reading-hl-blue:rgba(110,160,214,.20); --reading-hl-pink:rgba(226,92,92,.19);
+  --reading-ul-yellow:#d8a652; --reading-ul-green:#8fbf84; --reading-ul-blue:#86ade0; --reading-ul-pink:#e8837c;
+}
+/* HTML 正文、脚注、引用与图表浮窗沿用同一套变量。 */
+:root[data-reader-content] {
+  --paper-bg:var(--reading-bg); --paper-ink:var(--reading-fg); --paper-muted:var(--reading-muted);
+  --paper-zh:var(--reading-muted); --paper-rule:var(--reading-rule); --paper-accent:var(--reading-link);
+  --hl-yellow:var(--reading-hl-yellow); --hl-green:var(--reading-hl-green); --hl-blue:var(--reading-hl-blue); --hl-pink:var(--reading-hl-pink);
+  --ul-yellow:var(--reading-ul-yellow); --ul-green:var(--reading-ul-green); --ul-blue:var(--reading-ul-blue); --ul-pink:var(--reading-ul-pink);
+  color-scheme:light;
+}
+:root[data-reader-content][data-reading-tone="dark"] { color-scheme:dark; }
+:root[data-reader-content] a .ltx_ref_tag { color:var(--paper-accent); }
+:root[data-reader-content] img,
+:root[data-reader-content] :is(figure,.ltx_figure) svg:not(.katex svg) { filter:var(--reading-image-filter); }
+/* PDF 阅读正文和阅读浮窗使用阅读配色，工具栏与设置保留界面配色。 */
+:root[data-reader-theme] body:has(#stage) { background:var(--reading-bg); }
+:root[data-reader-theme] :is(#stage,#popover,#selbar,#blockbar) {
+  --bg:var(--reading-bg); --surface:var(--reading-bg); --surface-2:var(--reading-surface);
+  --ink:var(--reading-fg); --ink-2:var(--reading-muted); --ink-3:var(--reading-muted);
+  --rule:var(--reading-rule); --rule-2:var(--reading-rule); --accent:var(--reading-link);
+  --accent-soft:var(--reading-soft); --accent-soft-2:var(--reading-soft); --focus:var(--reading-soft);
+  --hl-yellow:var(--reading-hl-yellow); --hl-green:var(--reading-hl-green); --hl-blue:var(--reading-hl-blue); --hl-pink:var(--reading-hl-pink);
+  --ul-yellow:var(--reading-ul-yellow); --ul-green:var(--reading-ul-green); --ul-blue:var(--reading-ul-blue); --ul-pink:var(--reading-ul-pink);
+  color:var(--reading-fg);
+}
+:root[data-reader-theme] .blk-figure img { mix-blend-mode:normal; filter:var(--reading-image-filter); }
+:root[data-reader-theme] :is(.orig-page img,.pv-page img) { filter:var(--reading-image-filter); }
+:root[data-reader-theme] .pv-page { background:#fff; }
+:root[data-reader-theme="black"] .pv-page { background:#000; }
+.reader-theme-picker { position:fixed; z-index:110; padding:16px; border:1px solid var(--rule); border-radius:12px; background:var(--surface); box-shadow:var(--shadow-lg); }
+.reader-theme-title { font-size:14px; font-weight:600; margin-bottom:12px; }
+.reader-theme-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px; }
+.reader-theme-grid button { min-height:46px; border:1px solid #8886; border-radius:8px; font-size:15px; padding:7px 10px; }
+.reader-theme-grid button[aria-pressed="true"] { outline:3px solid #4072E5; outline-offset:1px; }
+.reader-theme-grid button:focus-visible { outline:3px solid #4072E5; outline-offset:1px; }
+#settings .reader-theme-grid { width:100%; margin:10px 0; }

@@ -1,0 +1,37 @@
+html, body { height:100%; margin:0; overflow:hidden; }
+body { display:flex; flex-direction:column; background:var(--bg); }
+.webbar, .web-tools { display:flex; align-items:center; gap:8px; padding:8px 18px; border-bottom:1px solid var(--rule); flex-wrap:wrap; }
+.webbar { min-height:48px; }
+.web-title { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:13px; color:var(--ink-2); }
+.web-tools { font-size:13px; }
+.web-tools[hidden] { display:none; }
+#sourceInfo { color:var(--ink-2); }
+#status { max-width:420px; overflow-wrap:anywhere; margin-left:auto; padding:3px 10px; border-radius:20px; background:var(--accent-soft); color:var(--accent); font-variant-numeric:tabular-nums; }
+#article { width:100%; flex:1; min-height:0; border:0; background:var(--bg); }
+.web-tools select { width:auto; }
+.web-stage { display:flex; flex:1; min-height:0; position:relative; }
+.web-stage #article { height:100%; }
+.web-stage .side-panel { position:relative; top:auto; bottom:auto; flex:none; width:min(420px, 42vw); height:100%; transform:none; display:none; }
+body.np-open #notespanel, body.ch-open #chatpanel { display:flex; }
+#notesBtn[aria-expanded="true"], #chatBtn[aria-expanded="true"] { background:var(--accent-soft); color:var(--accent); }
+#saveState { padding:0 4px; font-size:11px; }
+#selbar { max-width:calc(100vw - 16px); flex-wrap:wrap; z-index:90; }
+.article-jump-back { position:fixed; left:16px; bottom:18px; z-index:60; max-width:calc(100vw - 32px); background:var(--bg); border:1px solid var(--rule); box-shadow:var(--shadow-lg); }
+.article-jump-back[hidden] { display:none; }
+.web-stage .card .quote.lost::after { content:"（原话已变化，暂未定位）"; }
+.web-stage .np-list { padding:6px 18px 40px; }
+.web-stage .np-head { padding:0 10px; }
+.web-stage .np-head .seg button { padding:0 8px; }
+@media (max-width:760px) {
+  .web-stage .side-panel { position:absolute; right:0; width:min(600px, 100%); z-index:40; box-shadow:var(--shadow-lg); }
+  .web-title { flex-basis:100%; order:2; }
+  .webbar { padding:6px 10px; gap:4px; }
+  .webbar .btn { padding:0 7px; }
+  #saveState span { display:none; }
+}
+@media (max-width:640px) {
+  .webbar, .web-tools { padding:7px 10px; gap:4px; }
+  .web-title { flex-basis:calc(100% - 110px); }
+  #sourceInfo { flex-basis:100%; font-size:12px; }
+  #status { margin-left:auto; font-size:12px; }
+}

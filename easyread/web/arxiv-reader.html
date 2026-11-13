@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EasyRead · arXiv 共读</title>
+<link rel="icon" href="/web/favicon.svg">
+<link rel="stylesheet" href="/web/css/base.css">
+<link rel="stylesheet" href="/web/css/reader.css">
+<link rel="stylesheet" href="/web/css/reader-panels.css">
+<link rel="stylesheet" href="/web/css/reader-chat.css">
+<link rel="stylesheet" href="/web/css/selection-translation.css">
+<link rel="stylesheet" href="/web/css/settings.css">
+<link rel="stylesheet" href="/web/css/arxiv-reader.css">
+<link rel="stylesheet" href="/web/css/reader-theme.css">
+<link rel="stylesheet" href="/web/vendor/katex/katex.min.css">
+<link rel="stylesheet" href="/web/css/ui-foundation.css"><link rel="stylesheet" href="/web/css/reader-shell.css">
+<link rel="stylesheet" href="/web/css/reading-history.css"></head>
+<body class="reader-shell controls-hidden">
+<button id="readingControls" aria-label="显示阅读工具栏" aria-expanded="false" title="显示阅读工具栏">☰</button><div class="reader-edge" aria-hidden="true"></div>
+<header class="webbar reader-bar" id="readerBar" aria-label="阅读工具栏" inert>
+<a class="btn" href="/">← 文献库</a><span id="paperTitle" class="reader-title web-title">arXiv 网页阅读</span><span class="reader-mode">arXiv 网页</span>
+<button class="btn" id="theme" aria-haspopup="dialog" aria-expanded="false">外观</button><button class="btn" id="notesBtn" aria-expanded="false" title="划线与笔记（M）">笔记</button><button class="btn" id="chatBtn" aria-expanded="false" title="问 AI（A）">问 AI</button>
+<details class="reader-more"><summary aria-label="更多阅读操作">···</summary><div class="reader-menu">
+<button class="btn" id="jumpAbstract">跳到摘要</button><button class="btn" id="toggleZh">隐藏中文</button><button class="btn" id="translateBtn" aria-expanded="false" aria-controls="translationTools">翻译</button>
+<a id="original" class="btn" target="_blank" rel="noopener noreferrer">arXiv 原网页 ↗</a><a id="localPdf" class="btn" target="_blank" rel="noopener noreferrer" hidden>原 PDF ↗</a>
+<button class="btn" id="readingHistory">历史阅读记录</button><span class="save-state" id="saveState" role="status"><i></i><span>加载中</span></span><button id="hideControls" class="btn">收起工具栏</button>
+</div></details></header>
+<div class="web-tools" id="translationTools" hidden>
+  <span id="sourceInfo"></span>
+  <span class="grow"></span>
+  <select class="input" id="scope" aria-label="翻译范围">
+    <option value="abstract">摘要</option>
+    <option value="first:10">前 10 段</option>
+    <option value="all" selected>全文</option>
+  </select>
+  <button class="btn accent" id="translate">翻译所选范围</button>
+  <button class="btn" id="retry" hidden>重试失败段落</button>
+  <button class="btn" id="cancel" hidden>取消</button>
+  <span id="status" role="status">正在加载…</span>
+</div>
+<main class="web-stage">
+  <!-- article.html 的 CSP 禁止论文脚本；allow-scripts 使 WebKit 可分发阅读器注册的事件。 -->
+  <iframe id="article" title="论文原文与逐段中文译文" sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
+  <section id="notespanel" class="side-panel" aria-label="笔记" inert></section>
+  <section id="chatpanel" class="side-panel" aria-label="问 AI" inert></section>
+</main>
+<div class="dialog-backdrop" id="readerDlg"><div class="dialog" role="dialog" aria-label="导出笔记"></div></div>
+<div class="dialog-backdrop" id="settingsDlg"><div class="dialog" role="dialog" aria-label="设置"></div></div>
+<div class="dialog-backdrop" id="textDlg"><div class="dialog wide" role="dialog"></div></div>
+<div id="selbar" class="popover" role="toolbar" aria-label="选中文字操作"></div>
+<div id="toast" role="status"></div>
+<script src="/web/vendor/katex/katex.min.js"></script>
+<script src="/web/js/common/util.js"></script><script src="/web/js/common/selection-preview.js"></script>
+<script src="/web/js/common/reader-theme.js"></script>
+<script src="/web/js/common/confirm.js"></script>
+<script src="/web/js/common/features.js"></script>
+<script src="/web/js/common/markup.js"></script>
+<script src="/web/js/reader/store.js"></script>
+<script src="/web/js/reader/selection-translation.js"></script>
+<script src="/web/js/article-layout.js"></script>
+<script src="/web/js/article-footnotes.js"></script>
+<script src="/web/js/article-citations.js"></script>
+<script src="/web/js/article-xrefs.js"></script>
+<script src="/web/js/article-navigation.js"></script>
+<script src="/web/js/arxiv-annotations.js"></script>
+<script src="/web/js/reader/margin.js"></script>
+<script src="/web/js/reader/notespanel.js"></script>
+<script src="/web/js/reader/chat.js"></script>
+<script src="/web/js/reader/export.js"></script>
+<script src="/web/js/common/settings-models.js"></script>
+<script src="/web/js/common/settings.js"></script>
+<script src="/web/js/common/settings-tabs.js"></script>
+<script src="/web/js/common/settings-chat.js"></script>
+<script src="/web/js/common/settings-selection.js"></script>
+<script src="/web/js/common/reader-shell.js"></script>
+<script src="/web/js/common/reading-history.js"></script>
+<script src="/web/js/arxiv-reader.js"></script>
+</body>
+</html>

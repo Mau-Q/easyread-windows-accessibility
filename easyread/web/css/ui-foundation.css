@@ -1,0 +1,24 @@
+/* Shared interface foundation. Stage 1 opts in the library only; article palettes stay independent. */
+:root {
+  --bg: #f7f6f3; --surface: #fff; --surface-2: #eeefec;
+  --ink: #262a2b; --ink-2: #535b5e; --ink-3: #687073;
+  --rule: #dedfdb; --rule-2: #c9ceca; --accent: #2b6674;
+  --accent-soft: rgba(43,102,116,.07); --accent-soft-2: rgba(43,102,116,.12);
+  --ui: -apple-system, BlinkMacSystemFont, "PingFang SC", "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif;
+  --space-xs:4px; --space-sm:8px; --space-md:12px; --space-lg:16px; --space-xl:24px; --space-xxl:32px;
+  --control-radius:7px; --panel-radius:12px; --control-height:32px;
+}
+:root[data-theme="dark"] {
+  --bg:#1d1e20; --surface:#252629; --surface-2:#303236;
+  --ink:#ececea; --ink-2:#c5c8c9; --ink-3:#a6adaf;
+  --rule:#3a3c3f; --rule-2:#50555a; --accent:#91c5d1;
+  --accent-soft:rgba(145,197,209,.07); --accent-soft-2:rgba(145,197,209,.13);
+}
+.btn { border-radius:var(--control-radius); min-height:var(--control-height); }
+.btn.sm { min-height:26px; }
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[contenteditable="plaintext-only"]:focus-visible {
+  outline:2px solid var(--accent); outline-offset:3px;
+}
+.dialog { border-radius:var(--panel-radius); }
+.dialog h2 { font-family:var(--ui); }
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation-duration:.01ms!important;animation-iteration-count:1!important;}}

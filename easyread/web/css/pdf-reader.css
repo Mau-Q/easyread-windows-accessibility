@@ -1,0 +1,47 @@
+/* PDF pages and their surrounding UI share the existing five reading palettes. */
+:root[data-reader-theme]{--bg:var(--reading-bg);--surface:var(--reading-bg);--surface-2:var(--reading-surface);--ink:var(--reading-fg);--ink-2:var(--reading-muted);--ink-3:var(--reading-muted);--rule:var(--reading-rule);--rule-2:var(--reading-rule);--accent:var(--reading-link);--accent-soft:var(--reading-soft);--accent-soft-2:var(--reading-soft);--sample-bg:var(--reading-bg);--sample-border:var(--reading-rule);--mine:var(--reading-link);--mine-soft:var(--reading-soft);--focus:var(--reading-soft);color-scheme:light}
+:root[data-reading-tone=dark]{color-scheme:dark;--ok:#a3be8c;--danger:#ef9a9a}
+body.pdf-reader{background:var(--reading-bg);color:var(--reading-fg)}
+.pdf-reader .dualbar,.pdf-reader .pane-title,.pdf-reader #notespanel,.pdf-reader #chatpanel,.pdf-reader #selectionTools{background:var(--reading-bg);color:var(--reading-fg);border-color:var(--reading-rule)}
+.pdf-reader button,.pdf-reader input,.pdf-reader select{background:var(--reading-surface);color:var(--reading-fg);border-color:var(--reading-rule)}
+.pdf-reader button:hover{background:var(--reading-soft)}
+.pdf-reader .sample-notice,.pdf-reader .pane-title{display:none}
+.pdf-reader .pane,.pdf-reader .pane iframe,.pdf-reader #translationPending{background:var(--reading-bg);color:var(--reading-muted)}
+.pdf-reader #saveState{color:var(--ok)}
+.pdf-reader #status{background:var(--reading-bg);color:var(--reading-muted);border-color:var(--reading-rule)}
+.pdf-reader #status.sample-error{color:var(--danger)}
+.pdf-reader .ctx-preview{background:var(--reading-surface);border-color:var(--reading-rule)}
+.pdf-reader .ctx-preview .preview-quote{background:var(--reading-bg);border-color:var(--reading-link)}
+.pdf-reader #legacyPdfNotes,.pdf-reader .legacy-note{border-color:var(--reading-rule)}
+.pdf-reader #legacyPdfNotes h3,.pdf-reader .legacy-note blockquote,.pdf-reader #selectionLabel,.pdf-reader .pdf-note-identity{color:var(--reading-muted)}
+.pdf-reader.controls-hidden .dualbar{display:none}
+.pdf-reader.controls-hidden #status:not(.sample-error){display:none}
+#readingControls{position:fixed;top:10px;right:14px;z-index:250;width:36px;height:36px;padding:0;font-size:20px;opacity:.5;box-shadow:var(--shadow);border-radius:10px}
+#readingControls:hover,#readingControls:focus-visible{opacity:1}
+.pdf-reader .dualbar{gap:8px;min-height:44px;padding:7px 12px}
+.pdf-reader .actions{flex:1 1 500px;flex-wrap:wrap}
+.pdf-reader .actions button,.pdf-reader .actions label,.pdf-reader #pageCount{flex-shrink:0;white-space:nowrap}
+.pdf-reader .dualbar>button,.pdf-reader .dualbar>a{white-space:nowrap}
+.pdf-reader .dualbar #paperTitle{max-width:155px;font-size:12px}
+.pdf-reader #readerThemePicker{z-index:700;color:var(--reading-fg)}
+.pdf-reader #selectionTools{gap:5px;padding:6px 8px;max-width:calc(100vw - 16px);flex-wrap:wrap;box-shadow:var(--shadow);border-radius:10px}
+.pdf-reader #selectionTools>button{display:inline-flex;align-items:center;gap:4px;padding:5px 7px;font-size:12px;border:0;background:transparent}
+.pdf-reader #selectionTools>button:hover{background:var(--reading-soft)}
+.pdf-reader #selectionTools .pens button{padding:0;border:0;background:transparent}
+.pdf-reader #selectionTools .pens button.on{background:var(--reading-surface)}
+.pdf-reader #selectionTools .dots{display:inline-flex;align-items:center;gap:8px;padding:0 8px;height:26px}
+.pdf-reader #selectionTools .dots button{width:16px;height:16px;padding:0;border:0;border-radius:50%;background:var(--mark-color)}
+.pdf-reader #selectionTools .dots .dot-yellow{--mark-color:#ecc45c}
+.pdf-reader #selectionTools .dots .dot-green{--mark-color:#7eb576}
+.pdf-reader #selectionTools .dots .dot-blue{--mark-color:#6ea0d6}
+.pdf-reader #selectionTools .dots .dot-pink{--mark-color:#e25c5c}
+.pdf-reader #selectionTools .dots.pen-underline button{height:5px;margin:0;border-radius:2px}
+.pdf-reader #selectionTools .dots.pen-underline .dot-yellow{--mark-color:var(--reading-ul-yellow)}
+.pdf-reader #selectionTools .dots.pen-underline .dot-green{--mark-color:var(--reading-ul-green)}
+.pdf-reader #selectionTools .dots.pen-underline .dot-blue{--mark-color:var(--reading-ul-blue)}
+.pdf-reader #selectionTools .dots.pen-underline .dot-pink{--mark-color:var(--reading-ul-pink)}
+.pdf-reader #selectionTools .dots button.on{outline:2px solid var(--reading-fg);outline-offset:3px}
+.pdf-reader #nativeTranslationTools{position:fixed;left:64px;top:52px;z-index:22;display:flex;gap:8px;align-items:center;background:var(--reading-bg,var(--bg));color:var(--reading-fg,var(--fg));border-radius:8px;padding:5px 8px;font-size:12px;max-width:calc(100vw - 150px)}
+.pdf-reader.controls-hidden #nativeTranslationTools{display:none}
+.pdf-reader #nativeTranslationDialog{background:var(--reading-bg,var(--bg));color:var(--reading-fg,var(--fg));border:1px solid var(--line);border-radius:12px;max-width:600px;padding:24px}
+.pdf-reader #nativeTranslationDialog select{max-width:100%;display:block;margin:12px 0}

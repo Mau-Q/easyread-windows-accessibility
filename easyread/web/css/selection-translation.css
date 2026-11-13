@@ -1,0 +1,13 @@
+.selection-translation { position: fixed; z-index: 130; box-sizing: border-box; border: 1px solid var(--rule); border-radius: 12px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow-lg); font: 14px/1.65 var(--ui); overflow: hidden; }
+.selection-translation[hidden] { display: none; }
+.st-head, .st-foot { display: flex; align-items: center; gap: 10px; padding: 8px 14px; }
+.st-head { padding-bottom: 4px; justify-content: space-between; color: var(--ink-3); font-size: 12px; }
+.selection-translation button { border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; padding: 2px 4px; border-radius: 4px; }
+.selection-translation button:hover { background: var(--hover, #8882); }
+.selection-translation button:disabled { opacity: .35; cursor: default; }
+.st-head button { font-size: 20px; line-height: 1; }
+.st-result { padding: 2px 16px 12px; white-space: pre-wrap; overflow-wrap: anywhere; max-height: min(42vh, 340px); overflow-y: auto; user-select: text; }
+.st-foot { border-top: 1px solid var(--rule); font-size: 12px; color: var(--ink-2); gap: 7px; }
+.st-status { white-space: nowrap; }
+.selection-translation[data-phase="loading"] .st-result { color: var(--ink-3); }
+.selection-translation[data-phase="error"] .st-result { color: var(--danger, #b34747); }

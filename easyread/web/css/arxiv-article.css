@@ -1,0 +1,255 @@
+/* 阅读层样式：只调整展示，不改论文快照及中英文内容。 */
+:root {
+  --paper-bg:#f8f6f0;
+  --paper-ink:#2b2a27;
+  --paper-muted:#686760;
+  --paper-zh:#42616a;
+  --paper-rule:#d8dfdd;
+  --paper-accent:#31697b;
+  --paper-en:"Iowan Old Style", "Palatino Linotype", Georgia, "Times New Roman", serif;
+  --paper-sans:system-ui, -apple-system, "PingFang SC", "Noto Sans SC", sans-serif;
+  color-scheme:light;
+  background:var(--paper-bg);
+}
+:root[data-theme="dark"] {
+  --paper-bg:#242320;
+  --paper-ink:#e5e1d9;
+  --paper-muted:#aaa79f;
+  --paper-zh:#bccdd1;
+  --paper-rule:#425157;
+  --paper-accent:#98c2cf;
+  color-scheme:dark;
+}
+body {
+  box-sizing:border-box;
+  display:block;
+  margin:0;
+  padding:40px 28px 100px;
+  background:var(--paper-bg);
+  color:var(--paper-ink);
+  font:400 18px/1.75 var(--paper-en);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+article.ltx_document {
+  box-sizing:border-box;
+  width:100%;
+  max-width:780px;
+  margin:0 auto;
+  padding:0;
+}
+article.ltx_document .ltx_para { margin:0; }
+article.ltx_document .ltx_item { text-align:left; }
+article.ltx_document .ltx_p {
+  margin:0 0 1em;
+  font-family:var(--paper-en);
+  font-size:18px;
+  font-weight:400;
+  line-height:1.75;
+  text-align:left;
+  hyphens:none;
+  -webkit-hyphens:none;
+  overflow-wrap:break-word;
+}
+.ltx_p:has(+ .easyread-zh) { margin-bottom:12px; }
+.easyread-zh {
+  box-sizing:border-box;
+  display:block;
+  margin:12px 0 36px;
+  padding:0 0 0 18px;
+  border-left:2px solid var(--paper-rule);
+  color:var(--paper-zh);
+  font:400 17px/1.9 var(--paper-sans);
+  text-align:left;
+  overflow-wrap:break-word;
+  hyphens:none;
+}
+.easyread-zh[hidden] { display:none !important; }
+.easyread-zh p { margin:0 0 .65em; }
+.easyread-zh p:last-child { margin-bottom:0; }
+/* 独立脚注面板替代原站的悬浮样式，长注释可滚动且不占正文空间。 */
+article.ltx_document .ltx_note { display:inline; position:static; }
+article.ltx_document .ltx_note_outer { display:none !important; }
+.easyread-footnote-ref {
+  appearance:none; border:0; padding:0 2px; background:transparent; color:var(--paper-accent);
+  font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:2px;
+}
+.easyread-footnote-ref:focus-visible { outline:2px solid var(--paper-accent); outline-offset:3px; }
+.easyread-footnote-panel {
+  box-sizing:border-box; position:fixed; z-index:1000; max-height:calc(100vh - 24px); overflow:auto;
+  padding:16px 18px; border:1px solid var(--paper-rule); border-radius:10px;
+  background:var(--paper-bg); color:var(--paper-ink); box-shadow:0 8px 30px rgba(0,0,0,.22);
+  font:400 15px/1.7 var(--paper-en); overflow-wrap:anywhere;
+}
+.easyread-footnote-panel[hidden] { display:none !important; }
+.easyread-footnote-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:10px; font:14px/1.5 var(--paper-sans); }
+.easyread-footnote-head button { border:0; background:transparent; color:var(--paper-muted); padding:0 5px; font:22px/1 var(--paper-sans); cursor:pointer; }
+.easyread-footnote-panel a { color:var(--paper-accent); }
+.easyread-footnote-zh { margin-top:12px; padding-top:12px; border-top:1px solid var(--paper-rule); color:var(--paper-zh); font:15px/1.8 var(--paper-sans); }
+.easyread-footnote-zh p { margin:0 0 .6em; }
+.easyread-footnote-zh p:last-child { margin:0; }
+/* 直接呈现文末参考文献，悬浮窗不参与正文或批注布局。 */
+.easyread-citation-panel, .easyread-xref-panel {
+  box-sizing:border-box; position:fixed; z-index:1000;
+  max-height:calc(100vh - 24px); overflow:auto; overscroll-behavior:contain;
+  padding:16px 18px; border:1px solid var(--paper-rule); border-radius:10px;
+  background:var(--paper-bg); color:var(--paper-ink); box-shadow:0 8px 30px rgba(0,0,0,.22);
+  font:400 15px/1.7 var(--paper-en); overflow-wrap:anywhere;
+}
+.easyread-citation-panel[hidden], .easyread-xref-panel[hidden] { display:none !important; }
+.easyread-citation-panel .easyread-citation-entry { list-style:none; margin:0; padding:0; }
+.easyread-citation-panel .ltx_bibitem { display:block; margin:0; padding:0; text-indent:0; }
+.easyread-citation-panel .ltx_tag_bibitem { display:block; margin:0 0 8px; color:var(--paper-muted); font:13px/1.5 var(--paper-sans); }
+.easyread-citation-panel .ltx_bibblock { display:block; margin:0; padding:0; }
+.easyread-citation-panel a { color:var(--paper-accent); text-underline-offset:3px; }
+.easyread-citation-panel a:focus-visible { outline:2px solid var(--paper-accent); outline-offset:3px; }
+.easyread-xref-head { margin-bottom:12px; color:var(--paper-muted); font:13px/1.5 var(--paper-sans); }
+.easyread-xref-content :is(figure,.ltx_figure,.ltx_table,.ltx_equationgroup) { margin:0; max-width:100%; }
+.easyread-xref-content img, .easyread-xref-content svg { max-width:100%; height:auto; }
+.easyread-xref-content figcaption { margin-top:10px; font:14px/1.6 var(--paper-en); }
+.easyread-xref-content .ltx_tabular { font-size:13px; border-collapse:collapse; }
+.easyread-xref-content .ltx_tabular :is(th,td) { padding:4px 8px; border-bottom:1px solid var(--paper-rule); }
+.easyread-xref-content .ltx_eqn_table { width:100%; margin:0; }
+.easyread-xref-content .ltx_eqn_center_padleft, .easyread-xref-content .ltx_eqn_center_padright { width:0; }
+.easyread-xref-content a { color:var(--paper-accent); }
+article.ltx_document .ltx_title {
+  margin:1.8em 0 .5em;
+  color:var(--paper-ink);
+  font-family:var(--paper-sans);
+  font-weight:600;
+  line-height:1.4;
+  text-wrap:balance;
+}
+article.ltx_document h1.ltx_title { font-size:30px; }
+article.ltx_document h2.ltx_title { font-size:25px; }
+article.ltx_document h3.ltx_title { font-size:21px; }
+article.ltx_document :is(h4,h5,h6).ltx_title { font-size:18px; }
+.ltx_title + .easyread-zh {
+  margin:6px 0 24px;
+  padding:0;
+  border:0;
+  font-weight:500;
+  line-height:1.65;
+}
+h1.ltx_title + .easyread-zh { font-size:23px; text-wrap:balance; }
+h2.ltx_title + .easyread-zh { font-size:20px; }
+article.ltx_document .ltx_authors,
+article.ltx_document .ltx_dates {
+  font:400 14px/1.8 var(--paper-sans);
+  color:var(--paper-muted);
+}
+article.ltx_document :is(strong,b,.ltx_font_bold) { font-weight:600; }
+article.ltx_document .ltx_p :is(strong,b,.ltx_font_bold,.ltx_font_italic,.ltx_font_smallcaps) {
+  font-family:inherit;
+}
+article.ltx_document :is(code,.ltx_font_typewriter) {
+  font-family:ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size:.88em;
+  overflow-wrap:anywhere;
+}
+article.ltx_document a { color:var(--paper-accent); text-underline-offset:3px; }
+article.ltx_document :is(figure,.ltx_figure) { margin:30px 0; }
+article.ltx_document img { max-width:100%; height:auto; }
+article.ltx_document .ltx_caption {
+  color:var(--paper-muted);
+  font:400 14px/1.7 var(--paper-sans);
+}
+.ltx_caption + .easyread-zh { font-size:15px; margin-bottom:28px; }
+article.ltx_document :is(.ltx_equation,.ltx_equationgroup) {
+  max-width:100%;
+  overflow-x:auto;
+}
+article.ltx_document table.ltx_tabular {
+  display:block;
+  max-width:100%;
+  overflow-x:auto;
+  font-size:14px;
+  line-height:1.6;
+}
+.easyread-table-wrap { overflow-x:auto; }
+.easyread-zh table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:14px;
+  line-height:1.7;
+  font-variant-numeric:tabular-nums;
+}
+.easyread-zh th, .easyread-zh td {
+  border:1px solid var(--paper-rule);
+  padding:8px 10px;
+  text-align:left;
+}
+.easyread-zh th { font-weight:600; }
+.easyread-zh tbody tr:nth-child(even) { background:color-mix(in srgb, var(--paper-zh) 4%, transparent); }
+@media (max-width:640px) {
+  body { padding:26px 18px 70px; font-size:17px; }
+  article.ltx_document .ltx_p { font-size:17px; }
+  .easyread-zh { font-size:16px; padding-left:12px; margin-bottom:28px; }
+  article.ltx_document h1.ltx_title { font-size:25px; }
+  article.ltx_document h2.ltx_title { font-size:22px; }
+}
+
+/* 仅在阅读 DOM 中显示批注，不写回下载的论文快照。 */
+:root { --hl-yellow:rgba(236,196,92,.23); --hl-green:rgba(126,181,118,.20); --hl-blue:rgba(110,160,214,.19); --hl-pink:rgba(226,92,92,.17);
+  --ul-yellow:#b78718; --ul-green:#5b9a52; --ul-blue:#4a82c3; --ul-pink:#d0473f; }
+:root[data-theme="dark"] { --hl-yellow:rgba(216,163,92,.17); --hl-green:rgba(126,181,118,.16); --hl-blue:rgba(110,160,214,.16); --hl-pink:rgba(226,92,92,.15);
+  --ul-yellow:#d8a652; --ul-green:#8fbf84; --ul-blue:#86ade0; --ul-pink:#e8837c; }
+mark.easyread-mark { --mark-line:var(--ul-yellow); color:inherit; background:var(--hl-yellow); border-radius:0; padding:0; cursor:pointer;
+  -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+mark.easyread-mark.c-green { --mark-line:var(--ul-green); background:var(--hl-green); }
+mark.easyread-mark.c-blue { --mark-line:var(--ul-blue); background:var(--hl-blue); }
+mark.easyread-mark.c-pink { --mark-line:var(--ul-pink); background:var(--hl-pink); }
+mark.easyread-mark.s-ul { background:transparent; text-decoration:underline; text-decoration-color:var(--mark-line);
+  text-decoration-thickness:1.5px; text-underline-offset:.18em; text-decoration-skip-ink:none; }
+article.ltx_document mark.easyread-mark a,
+article.ltx_document a:has(mark.easyread-mark) { color:inherit; background:transparent; text-decoration-color:var(--paper-muted); text-decoration-thickness:1px; }
+mark.easyread-mark mark.easyread-mark { background:transparent; }
+mark.easyread-mark.active, .easyread-focus { outline:2px solid var(--paper-accent); outline-offset:3px; border-radius:2px; }
+.easyread-note-pin { float:right; position:relative; z-index:1; margin:2px -22px 0 4px; min-width:20px; height:20px; padding:0 5px;
+  border:1px solid var(--paper-rule); border-radius:10px; background:var(--paper-bg); color:var(--paper-accent); font:12px/18px var(--paper-sans); cursor:pointer; }
+@media (max-width:640px) { .easyread-note-pin { margin-right:-10px; } }
+
+/* 所有论文共用的图表阅读规则；内容节点不重建、不写回快照。 */
+article.ltx_document .easyread-visual {
+  box-sizing:border-box; position:relative; left:50%; transform:translateX(-50%);
+  width:min(1100px, calc(100vw - 56px)); max-width:none; margin:32px 0;
+}
+.easyread-visual-controls { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; margin:0 0 10px; }
+.easyread-image-error { margin-right:auto; color:var(--paper-muted); font:13px/1.5 var(--paper-sans); }
+.easyread-visual-controls button, .easyread-visual-dialog-bar button {
+  border:1px solid var(--paper-rule); border-radius:6px; padding:5px 10px;
+  background:var(--paper-bg); color:var(--paper-accent); font:13px/1.5 var(--paper-sans); cursor:pointer;
+}
+.easyread-visual-controls button[aria-pressed="true"] { background:var(--paper-accent); color:var(--paper-bg); }
+.easyread-visual-controls button:disabled { opacity:.4; cursor:default; }
+.easyread-visual :is(img,svg) { display:block; max-width:100%; height:auto; margin:0 auto; }
+.easyread-visual img.ltx_graphics { width:100%; }
+.easyread-visual pre { max-width:100%; overflow:auto; }
+.easyread-table-scroll, .easyread-visual .easyread-table-wrap { max-width:100%; overflow:auto; overscroll-behavior-x:contain; }
+article.ltx_document .easyread-table-scroll table.ltx_tabular {
+  display:table; width:100%; max-width:none; overflow:visible; font-size:15px; line-height:1.55;
+}
+.easyread-visual .easyread-zh { margin:12px 0 18px; padding-left:12px; font-size:15px; line-height:1.75; }
+.easyread-visual .easyread-zh table { min-width:600px; font-size:14px; }
+.easyread-visual .ltx_caption { margin-top:12px; line-height:1.6; text-align:left; }
+.easyread-visual.easyread-visual-en .easyread-table-translation { display:none; }
+.easyread-visual.easyread-visual-zh > .easyread-table-scroll,
+.easyread-visual.easyread-visual-zh .easyread-table-scroll:has(> table.ltx_tabular) { display:none; }
+.easyread-visual-dialog {
+  box-sizing:border-box; position:fixed; inset:20px; width:calc(100vw - 40px); height:calc(100vh - 40px);
+  max-width:none; max-height:none; margin:auto; padding:0; border:1px solid var(--paper-rule); border-radius:10px;
+  background:var(--paper-bg); color:var(--paper-ink); overflow:hidden;
+}
+.easyread-visual-dialog::backdrop { background:rgba(0,0,0,.65); }
+.easyread-visual-dialog-bar { display:flex; gap:8px; align-items:center; padding:12px 16px; border-bottom:1px solid var(--paper-rule); }
+.easyread-visual-dialog-bar span { flex:1; font:14px/1.5 var(--paper-sans); }
+.easyread-visual-viewport { height:calc(100% - 62px); overflow:auto; padding:18px; box-sizing:border-box; }
+.easyread-visual-dialog-content { min-width:600px; }
+.easyread-visual-dialog-content > .easyread-visual { position:static; transform:none; width:100%; max-width:none; margin:0; }
+.easyread-visual-dialog .easyread-table-scroll, .easyread-visual-dialog .easyread-table-wrap { overflow:visible; }
+@media (max-width:640px) {
+  article.ltx_document .easyread-visual { width:calc(100vw - 36px); margin:24px 0; }
+  .easyread-visual-dialog { inset:6px; width:calc(100vw - 12px); height:calc(100vh - 12px); }
+  .easyread-visual-dialog-bar { padding:8px; gap:5px; }
+  .easyread-visual-dialog-bar button { padding:4px 7px; }
+}
