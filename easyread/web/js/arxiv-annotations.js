@@ -187,6 +187,7 @@
     current = anchor;
     if (matchMedia("(max-width: 760px)").matches) PR.openSide(null);
     target.scrollIntoView({ block: "center", behavior: "smooth" });
+    target.tabIndex=-1;target.focus({preventScroll:true});
     target.classList.add("easyread-focus"); setTimeout(() => target.classList.remove("easyread-focus"), 1400);
     PR.emit("reading-context");
   };
@@ -247,6 +248,9 @@
     const b = e.target.closest("[data-s]"); if (b) PR.selectionAction(b.dataset.s, b.dataset.color);
   });
   function keydown(e) {
+    if((e.key==='F10'&&e.shiftKey)||e.key==='ContextMenu'){
+      if(selection()){e.preventDefault();e.stopImmediatePropagation();showSelection();bar.querySelector('button')?.focus();return;}
+    }
     if (e.isComposing || e.ctrlKey || e.metaKey || e.altKey || e.target.closest("textarea, input, [contenteditable]")) return;
     const key = e.key.toLowerCase();
     if (key === "escape") { hideSelection(); PR.openSide(null); return; }
@@ -275,6 +279,8 @@
 
   PR.attachArticle = function (articleDoc, { deferIndex = false } = {}) {
     doc = articleDoc; current = null;
+    doc.body.tabIndex=0;
+    const focusStyle=doc.createElement('style');focusStyle.textContent='body:focus-visible,[tabindex="-1"]:focus-visible{outline:3px solid Highlight;outline-offset:-3px}';doc.head.append(focusStyle);
     sourceNodes = new Map(); translatedNodes = new Map(); indexedPaper = null;
     segments = []; segmentsIndexed = false;
     marksSignature = pinsSignature = null; marksRevision++;

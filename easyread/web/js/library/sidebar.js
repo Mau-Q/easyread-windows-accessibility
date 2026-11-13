@@ -101,12 +101,12 @@
   const more = '<span class="more" data-more title="更多">' + PR.icon("more", "sm") + "</span>";
   function viewRow(v, pinnedRow) {
     const [k, label, icon, fn] = v;
-    return '<div class="srow' + (L.view === k && !L.tag ? " on" : "") + '" data-view="' + k + '"' + (pinnedRow ? " data-pinrow" : "") + ">" + PR.icon(icon, "sm") + "<span class=\"t\">" + label +
+    return '<div class="srow' + (L.view === k && !L.tag ? " on" : "") + '" tabindex="0" role="button" data-view="' + k + '"' + (pinnedRow ? " data-pinrow" : "") + ">" + PR.icon(icon, "sm") + "<span class=\"t\">" + label +
       '</span><span class="n">' + count(fn) + "</span>" + (k === "all" && !pinnedRow ? "" : more) + "</div>";
   }
   function catRow(c, pinnedRow) {
     if (ui.renaming === c && !pinnedRow) return '<div class="srow editing">' + PR.icon("folder", "sm") + '<input class="side-input" data-rename="' + PR.esc(c) + '" value="' + PR.esc(c) + '" maxlength="30"></div>';
-    return '<div class="srow' + (L.tag === c ? " on" : "") + '" data-cat="' + PR.esc(c) + '"' + (pinnedRow ? " data-pinrow" : "") + ">" + PR.icon("folder", "sm") +
+    return '<div class="srow' + (L.tag === c ? " on" : "") + '" tabindex="0" role="button" data-cat="' + PR.esc(c) + '"' + (pinnedRow ? " data-pinrow" : "") + ">" + PR.icon("folder", "sm") +
       '<span class="t">' + PR.esc(c) + '</span><span class="n">' + count((i) => (i.tags || []).includes(c)) + "</span>" + more + "</div>";
   }
   /* 侧栏放短标题：优先用翻译时起的短标题，其次取中文标题冒号前那半句 */
@@ -182,6 +182,12 @@
       .concat({ label: "新建分类并放进去…", icon: "plus", fn: () => { ui.adding = id; L.render(); } });
   };
 
+  PR.$("#side").addEventListener("keydown", e => {
+    const row=e.target.closest(".srow[data-view],.srow[data-cat],.srow[data-paper]");
+    if(!row || e.target.matches("input"))return;
+    if(e.key==="ContextMenu" || (e.shiftKey&&e.key==="F10")){e.preventDefault();rowMenu(row,row);}
+    else if(e.key==="Enter" || e.key===" "){e.preventDefault();row.click();}
+  });
   /* ---------- 事件 ---------- */
   const side = PR.$("#side");
   side.addEventListener("click", (e) => {
@@ -202,7 +208,7 @@
     e.preventDefault();
     rowMenu(row, { x: e.clientX, y: e.clientY });
   });
-  function commitInput(inp, cancel) {
+  function commitInput(inp, cancel, restoreFocus = false) {
     if (inp.dataset.done) return;
     inp.dataset.done = "1";
     inp.blur();  // 输入框还有焦点时侧栏不重画（见 renderSide），先让它失焦，回车后新分类才会马上出现
@@ -210,22 +216,35 @@
     const forPaper = typeof ui.adding === "string" ? ui.adding : null;
     if (inp.dataset.new !== undefined) { ui.adding = false; if (!cancel) L.addCat(val, forPaper); else L.render(); }
     else { const from = inp.dataset.rename; ui.renaming = null; if (!cancel) L.renameCat(from, val); else L.render(); }
+    if(restoreFocus) requestAnimationFrame(()=>{
+      const name=cancel ? inp.dataset.rename : val.trim();
+      const row=PR.$$('.srow[data-cat]',side).find(e=>e.dataset.cat.toLowerCase()===String(name||'').toLowerCase());
+      (row || PR.$('[data-add]',side))?.focus();
+    });
   }
   side.addEventListener("keydown", (e) => {
     const inp = e.target.closest(".side-input");
     if (!inp) return;
-    if (e.key === "Enter") { e.preventDefault(); commitInput(inp); }
-    if (e.key === "Escape") { e.preventDefault(); commitInput(inp, true); }
+    if (e.key === "Enter") { e.preventDefault(); commitInput(inp, false, true); }
+    if (e.key === "Escape") { e.preventDefault(); commitInput(inp, true, true); }
     e.stopPropagation();
   });
   side.addEventListener("focusout", (e) => { const inp = e.target.closest(".side-input"); if (inp && inp.isConnected) setTimeout(() => inp.isConnected && commitInput(inp), 0); });
 
   /* 侧栏宽度：右边缘拖动，记在本机 */
   const lib = PR.$(".lib");
-  const setW = (w) => lib.style.setProperty("--side-w", Math.max(180, Math.min(420, w)) + "px");
+  const setW = (w) => { w=Math.max(180,Math.min(420,w));lib.style.setProperty("--side-w",w+"px");PR.$('.side-grip')?.setAttribute('aria-valuenow',String(w)); };
   setW(PR.ls.get("easyread-side-w", 248));
-  const grip = PR.el("div", { class: "side-grip", title: "拖动调整侧栏宽度（双击恢复）" });
+  const grip = PR.el("div", { class: "side-grip", tabindex: "0", role:"separator", 'aria-label':'侧栏宽度，左右方向键调整', 'aria-orientation':'vertical', 'aria-valuemin':'180', 'aria-valuemax':'420', title: "拖动调整侧栏宽度（双击恢复）" });
   lib.appendChild(grip);
+  setW(parseInt(lib.style.getPropertyValue('--side-w'),10));
+  grip.addEventListener('keydown',e=>{
+    if(!['ArrowLeft','ArrowRight','Home','End'].includes(e.key))return;
+    e.preventDefault();e.stopPropagation();
+    const current=parseInt(lib.style.getPropertyValue('--side-w'),10);
+    setW(e.key==='Home'?180:e.key==='End'?420:current+(e.key==='ArrowLeft'?-10:10));
+    PR.ls.set('easyread-side-w',parseInt(lib.style.getPropertyValue('--side-w'),10));
+  });
   grip.addEventListener("mousedown", (e) => {
     e.preventDefault();
     document.body.classList.add("resizing");

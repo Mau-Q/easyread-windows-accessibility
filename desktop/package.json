@@ -2,6 +2,6 @@
   "name": "easyread-desktop",
   "private": true,
   "version": "0.1.0",
-  "scripts": {"build": "tauri build --bundles app", "dev": "tauri dev"},
+  "scripts": {"build": "tauri build --no-bundle", "build:mac": "tauri build --bundles app", "dev": "tauri dev"},
   "devDependencies": {"@tauri-apps/cli": "^2"}
 }

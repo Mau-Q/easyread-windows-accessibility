@@ -1,9 +1,12 @@
 use reqwest::blocking::Client;
 use serde_json::Value;
+#[cfg(unix)]
+use std::os::unix::process::CommandExt;
+#[cfg(windows)]
+use std::os::windows::process::CommandExt;
 use std::{
     fs,
     net::TcpListener,
-    os::unix::process::CommandExt,
     path::PathBuf,
     process::{Child, Command, Stdio},
     sync::{
@@ -16,6 +19,8 @@ use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem, Submenu},
     Manager, RunEvent, WebviewUrl, WebviewWindowBuilder, WindowEvent,
 };
+#[cfg(windows)]
+mod windows_keys;
 
 struct Backend {
     child: Arc<Mutex<Option<Child>>>,
@@ -32,8 +37,20 @@ struct Lifecycle {
 
 fn stop_child(child: &Mutex<Option<Child>>) {
     if let Some(mut child) = child.lock().unwrap().take() {
+        #[cfg(unix)]
         unsafe {
             libc::kill(-(child.id() as i32), libc::SIGTERM);
+        }
+        #[cfg(windows)]
+        {
+            let result = Command::new("taskkill")
+                .args(["/PID", &child.id().to_string(), "/T", "/F"])
+                .creation_flags(0x08000000)
+                .output();
+            if !result.is_ok_and(|r| r.status.success()) {
+                eprintln!("结束后台进程树失败，尝试结束主进程");
+                let _ = child.kill();
+            }
         }
         let _ = child.wait();
     }
@@ -62,6 +79,23 @@ fn root() -> PathBuf {
                 .unwrap()
                 .to_path_buf()
         })
+}
+
+fn open_url(url: &str) {
+    #[cfg(target_os = "macos")]
+    let result = Command::new("/usr/bin/open").arg(url).spawn();
+    #[cfg(windows)]
+    let result = Command::new("rundll32.exe")
+        .args(["url.dll,FileProtocolHandler", url])
+        .spawn();
+    #[cfg(all(unix, not(target_os = "macos")))]
+    let result = Command::new("xdg-open").arg(url).spawn();
+    if let Err(error) = result {
+        rfd::MessageDialog::new()
+            .set_title("无法打开浏览器")
+            .set_description(error.to_string())
+            .show();
+    }
 }
 
 fn data_home(root: &std::path::Path) -> PathBuf {
@@ -114,9 +148,13 @@ fn start_backend(lifecycle: &Lifecycle) -> Result<Backend, Box<dyn std::error::E
             });
         }
     }
-    let python = root.join(".venv/bin/python");
+    let python = root.join(if cfg!(windows) {
+        ".venv/Scripts/python.exe"
+    } else {
+        ".venv/bin/python"
+    });
     if !python.exists() {
-        return Err("找不到 Python 环境，请先运行项目里的 start.sh".into());
+        return Err("找不到 Python 环境，请按 README 建立项目 .venv 并安装依赖".into());
     }
     let port = fs::read(data_home(&root).join("config.json"))
         .ok()
@@ -141,7 +179,8 @@ fn start_backend(lifecycle: &Lifecycle) -> Result<Backend, Box<dyn std::error::E
     let log = fs::OpenOptions::new()
         .create(true)
         .append(true)
-        .open(root.join("desktop.log"))?;
+        .open(data_home(&root).join("desktop.log"))?;
+    #[cfg(unix)]
     let path = format!(
         "/opt/homebrew/bin:/usr/local/bin:{}",
         std::env::var("PATH").unwrap_or_default()
@@ -151,10 +190,15 @@ fn start_backend(lifecycle: &Lifecycle) -> Result<Backend, Box<dyn std::error::E
         .args(["-m", "easyread", "serve", "--port", &port.to_string()])
         .current_dir(&root)
         .env("EASYREAD_HOME", data_home(&root))
-        .env("PATH", path)
+        .env("PYTHONUTF8", "1")
         .stdin(Stdio::null())
         .stdout(log.try_clone()?)
         .stderr(log);
+    #[cfg(unix)]
+    command.env("PATH", path);
+    #[cfg(windows)]
+    command.creation_flags(0x08000000);
+    #[cfg(unix)]
     unsafe {
         command.pre_exec(|| {
             if libc::setsid() == -1 {
@@ -183,7 +227,10 @@ fn start_backend(lifecycle: &Lifecycle) -> Result<Backend, Box<dyn std::error::E
         }
         if let Some(info) = read_info(&root) {
             let pid = backend.child.lock().unwrap().as_ref().unwrap().id();
-            if info["pid"].as_u64() == Some(pid as u64) {
+            // Windows venv python.exe redirects to a real Python child process.
+            if info["pid"].as_u64() == Some(pid as u64)
+                || (cfg!(windows) && info["parent_pid"].as_u64() == Some(pid as u64))
+            {
                 if let Some(url) = info["url"].as_str() {
                     if url != expected_url {
                         return Err("启动时端口被占用，服务地址发生变化，请重试。".into());
@@ -251,11 +298,14 @@ fn request_quit(app: &tauri::AppHandle) {
         _ => None,
     };
     if let Some(message) = message {
-        let answer = rfd::MessageDialog::new()
+        let mut dialog = rfd::MessageDialog::new()
             .set_title("退出 EasyRead")
             .set_description(message)
-            .set_buttons(rfd::MessageButtons::YesNo)
-            .show();
+            .set_buttons(rfd::MessageButtons::YesNo);
+        if let Some(window) = app.get_webview_window("main") {
+            dialog = dialog.set_parent(&window);
+        }
+        let answer = dialog.show();
         if answer != rfd::MessageDialogResult::Yes {
             return;
         }
@@ -278,48 +328,63 @@ fn main() {
         .plugin(tauri_plugin_single_instance::init(|app, _, _| show(app)))
         .setup(|app| {
             let nav_handle = app.handle().clone();
-            WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
-                .title("EasyRead")
-                .inner_size(1280.0, 860.0)
-                .min_inner_size(800.0, 580.0)
-                // HTML drag/drop must receive PDFs instead of Tauri's native drop interception.
-                .disable_drag_drop_handler()
-                .on_new_window(|url, _| {
-                    if matches!(url.scheme(), "http" | "https") {
-                        let _ = Command::new("/usr/bin/open").arg(url.as_str()).spawn();
-                    }
-                    tauri::webview::NewWindowResponse::Deny
-                })
-                .on_download(|_, event| {
-                    if let tauri::webview::DownloadEvent::Requested { destination, .. } = event {
-                        let name = destination
-                            .file_name()
-                            .and_then(|n| n.to_str())
-                            .unwrap_or("EasyRead-export.html");
-                        if let Some(path) = rfd::FileDialog::new().set_file_name(name).save_file() {
-                            *destination = path;
-                        } else {
-                            return false;
+            let main_window =
+                WebviewWindowBuilder::new(app, "main", WebviewUrl::App("index.html".into()))
+                    .title("EasyRead")
+                    .inner_size(1280.0, 860.0)
+                    .min_inner_size(800.0, 580.0)
+                    // HTML drag/drop must receive PDFs instead of Tauri's native drop interception.
+                    .disable_drag_drop_handler()
+                    .on_new_window(|url, _| {
+                        if matches!(url.scheme(), "http" | "https") {
+                            open_url(url.as_str());
                         }
-                    }
-                    true
-                })
-                .on_navigation(move |url| {
-                    if !matches!(url.scheme(), "http" | "https") {
-                        return true;
-                    }
-                    if nav_handle
-                        .try_state::<Backend>()
-                        .is_some_and(|b| url.as_str().starts_with(&format!("{}/", b.url)))
-                    {
-                        return true;
-                    }
-                    if matches!(url.scheme(), "http" | "https") {
-                        let _ = Command::new("/usr/bin/open").arg(url.as_str()).spawn();
-                    }
-                    false
-                })
-                .build()?;
+                        tauri::webview::NewWindowResponse::Deny
+                    })
+                    .on_download(|window, event| {
+                        if let tauri::webview::DownloadEvent::Requested { destination, .. } = event
+                        {
+                            let name = destination
+                                .file_name()
+                                .and_then(|n| n.to_str())
+                                .unwrap_or("EasyRead-export.html");
+                            if let Some(path) = rfd::FileDialog::new()
+                                .set_parent(&window.window())
+                                .set_file_name(name)
+                                .save_file()
+                            {
+                                *destination = path;
+                            } else {
+                                return false;
+                            }
+                        }
+                        true
+                    })
+                    .on_navigation(move |url| {
+                        // WebView2 resolves bundled App URLs to this HTTP origin.
+                        // Let the local startup document load before Backend exists.
+                        if url.scheme() == "http" && url.host_str() == Some("tauri.localhost") {
+                            return matches!(url.path(), "/" | "/index.html");
+                        }
+                        if !matches!(url.scheme(), "http" | "https") {
+                            return true;
+                        }
+                        if nav_handle
+                            .try_state::<Backend>()
+                            .is_some_and(|b| url.as_str().starts_with(&format!("{}/", b.url)))
+                        {
+                            return true;
+                        }
+                        if matches!(url.scheme(), "http" | "https") {
+                            open_url(url.as_str());
+                        }
+                        false
+                    })
+                    .build()?;
+            #[cfg(windows)]
+            windows_keys::install(&main_window)?;
+            #[cfg(not(windows))]
+            let _ = main_window;
             let open = MenuItem::with_id(app, "show", "显示 EasyRead", true, None::<&str>)?;
             let browser = MenuItem::with_id(app, "browser", "在浏览器中打开", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "退出 EasyRead", true, Some("CmdOrCtrl+Q"))?;
@@ -375,7 +440,7 @@ fn main() {
             "show" => show(app),
             "browser" => {
                 if let Some(state) = app.try_state::<Backend>() {
-                    let _ = Command::new("/usr/bin/open").arg(&state.url).spawn();
+                    open_url(&state.url);
                 }
             }
             "quit" => request_quit(app),
@@ -384,7 +449,10 @@ fn main() {
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();
+                #[cfg(target_os = "macos")]
                 let _ = window.hide();
+                #[cfg(not(target_os = "macos"))]
+                request_quit(window.app_handle());
             }
         })
         .build(tauri::generate_context!())
@@ -396,6 +464,7 @@ fn main() {
                 request_quit(app);
             }
         }
+        #[cfg(target_os = "macos")]
         RunEvent::Reopen { .. } => show(app),
         RunEvent::Exit => {
             let lifecycle = app.state::<Lifecycle>();

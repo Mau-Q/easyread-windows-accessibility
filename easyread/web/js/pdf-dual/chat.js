@@ -130,8 +130,8 @@
       (st.listOpen ? listHtml() : "");
   }
   function listHtml() {
-    const rows = st.threads.map((t) => '<div class="ch-thread' + (t.id === st.cur ? " on" : "") + '" data-t="' + PR.esc(t.id) + '"><div class="tt">' + PR.esc(t.title) + "</div>" +
-      '<div class="tm">' + Math.round((t.messages || []).length / 2) + " 问 · " + PR.esc(when(t.updated)) + "</div>" +
+    const rows = st.threads.map((t) => '<div class="ch-thread' + (t.id === st.cur ? " on" : "") + '" data-t="' + PR.esc(t.id) + '"><button class="ch-thread-open" type="button"><span class="tt">' + PR.esc(t.title) + "</span>" +
+      '<span class="tm">' + Math.round((t.messages || []).length / 2) + " 问 · " + PR.esc(when(t.updated)) + "</span></button>" +
       '<button class="tx" data-c="rename" title="改名">' + PR.icon("edit", "sm") + '</button><button class="tx" data-c="del" title="删除">' + PR.icon("trash", "sm") + "</button></div>").join("");
     return '<div class="ch-list"><button class="ch-thread newt" data-c="new">' + PR.icon("plus", "sm") + "新对话</button>" + (rows || '<div class="hint" style="padding:10px 12px">还没有对话。</div>') + "</div>";
   }

@@ -23,6 +23,8 @@ WEB = config.WEB
 mimetypes.add_type("image/webp", ".webp")
 mimetypes.add_type("font/woff2", ".woff2")
 mimetypes.add_type("text/javascript", ".js")
+mimetypes.add_type("text/javascript", ".mjs")
+mimetypes.add_type("text/css", ".css")
 MAX_UPLOAD = 200 * 1024 * 1024
 
 
@@ -568,7 +570,8 @@ def serve(port: int | None = None, open_browser: bool = False, path: str = "/"):
     runtime = httpd.runtime
     url = f"http://127.0.0.1:{httpd.server_address[1]}"
     info = {"url": url, "pid": os.getpid(), "started": now_iso(),
-            "instance": runtime.instance, "desktop_token": runtime.desktop_token}
+            "instance": runtime.instance, "desktop_token": runtime.desktop_token,
+            "parent_pid": os.getppid()}
     if not config.temp_library():
         write_json_atomic(config.SERVER_INFO, info)
         config.SERVER_INFO.chmod(0o600)

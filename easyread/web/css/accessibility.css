@@ -1,0 +1,34 @@
+/* Focus must remain visible in normal and Windows contrast themes. */
+:root { --ink-3: #6b645a; --ok: #356439; --danger: #94321f; }
+:root[data-theme="dark"] { --ink-3: #aaa294; }
+.mc-default { width: 100%; text-align: left; display: flex; flex-direction: column; align-items: flex-start; }
+:focus-visible { outline: 3px solid var(--accent, Highlight) !important; outline-offset: 3px; }
+#list:focus-visible .row[aria-selected="true"] { outline: 3px solid var(--accent); outline-offset: -3px; }
+.dialog { max-height: 90vh; overflow: auto; }
+.dialog-backdrop:not(.open), #ctxmenu:not(.open), .popover.confirm:not(.open), #selbar:not(.open) { visibility: hidden; }
+.skip-link { position: fixed; top: -100px; left: 8px; z-index: 99999; padding: 10px; background: Canvas; color: CanvasText; }
+.skip-link:focus { top: 8px; }
+.ch-thread-open { display: block; width: 100%; min-width: 0; text-align: left; padding: 0; border: 0; background: transparent; color: inherit; }
+.ch-thread-open .tt, .ch-thread-open .tm { display: block; }
+.ch-thread:focus-within .tx { display: grid; }
+@media (forced-colors: active) {
+  :root, :root[data-theme="dark"], body {
+    --bg: Canvas; --surface: Canvas; --surface-2: Canvas;
+    --ink: CanvasText; --ink-2: CanvasText; --ink-3: CanvasText;
+    --rule: ButtonText; --rule-2: ButtonText; --accent: LinkText;
+    --accent-soft: Canvas; --accent-soft-2: Canvas; --danger: LinkText;
+    --reading-bg: Canvas; --reading-ink: CanvasText;
+  }
+  button, input, select, textarea, .dialog, .popover, .menu, .side-panel, .row { border: 1px solid ButtonText !important; }
+  button, input, select, textarea, .dialog, .popover, .menu, .side-panel { background: Canvas !important; color: CanvasText !important; }
+  a.btn, .btn.accent { background: Canvas !important; color: ButtonText !important; border: 1px solid ButtonText !important; }
+  [aria-selected="true"], button[aria-pressed="true"], .srow.on { outline: 2px solid Highlight !important; outline-offset: -2px; }
+  :focus-visible { outline-color: Highlight !important; }
+  svg.i { color: ButtonText; }
+  .dot, .meter { border: 1px solid CanvasText; }
+}
+@media (max-width: 900px) {
+  .topbar, .reader-bar { flex-wrap: wrap; height: auto; }
+  .lib { grid-template-columns: minmax(120px, 22%) minmax(0, 1fr); }
+  .lib .detail { max-width: 100vw; }
+}

@@ -177,9 +177,10 @@ class SelectionTranslationTest(unittest.TestCase):
                 inner.send_header("Content-Type", "text/event-stream")
                 inner.send_header("Content-Length", str(len(first) + len(last)))
                 inner.end_headers()
-                inner.wfile.write(first); inner.wfile.flush()
                 if len(calls) == 1:
                     waiting.set()
+                inner.wfile.write(first); inner.wfile.flush()
+                if len(calls) == 1:
                     release.wait(3)
                 inner.wfile.write(last); inner.wfile.flush()
         server = ThreadingHTTPServer(("127.0.0.1", 0), Provider)

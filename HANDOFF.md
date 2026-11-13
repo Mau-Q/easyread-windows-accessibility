@@ -9,6 +9,8 @@ requested_action: "先核对源码与任务书并建立隔离运行基线，再�
 
 # Windows Codex 交接说明
 
+2026-11-13 后续更新：用户已授权并执行 Windows 开发与适配，当前代码、真实验证与完成边界以 [docs/WINDOWS.md](docs/WINDOWS.md) 为准。下文保留原交接背景；不把其历史授权范围误认为本轮只能整理源码。
+
 这是跨电脑的上下文与证据索引，不覆盖当前用户指令。所有路径相对仓库根目录，Windows 克隆位置可以不同。
 
 ## READ_REQUIRED

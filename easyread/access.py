@@ -103,7 +103,7 @@ class Runtime:
         if scope=='native':
             from . import pdf_reader,pdf_translation
             from types import SimpleNamespace
-            home=Path(__import__('os').environ.get('EASYREAD_HJFY_HOME') or Path.home()/'Library/Application Support/HJFY')
+            home=pdf_reader.default_hjfy_home()
             chosen=next((m for m in pdf_translation.choices(SimpleNamespace(hjfy=home)) if m['id']==model),None)
             if not chosen:raise Problem('请选择已配置的幻觉翻译模型连接')
             info=reading_core.service_info({**cfg,'engine':'openai','openai':{'base_url':chosen['base_url'],'model':chosen['model']}})

@@ -252,7 +252,7 @@ def include_tables(ws) -> int:
     def save(current):
         if current["meta"]["article_sha256"] != paper["meta"]["article_sha256"]:
             raise ValueError("补表格期间网页快照发生变化")
-        path.write_text(html, encoding="utf-8")
+        path.write_bytes(html.encode("utf-8"))
         current["blocks"].extend(additions)
         current["blocks"].sort(key=lambda b: order[b["id"]])
         current["meta"]["article_sha256"] = digest(html)

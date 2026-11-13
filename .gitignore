@@ -2,6 +2,7 @@
 .DS_Store
 /.playwright-cli/
 /desktop/node_modules/
+/tests/node_modules/
 /desktop/src-tauri/target/
 /desktop/src-tauri/gen/schemas/
 /desktop.log

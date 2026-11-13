@@ -23,6 +23,16 @@ def pdf(path, pages=1):
 
 
 class PDFReaderTest(unittest.TestCase):
+    def test_operator_home_override_and_platform_default(self):
+        with tempfile.TemporaryDirectory() as root:
+            with patch.dict(os.environ, {'EASYREAD_HJFY_HOME': root}):
+                self.assertEqual(pdf_reader.default_hjfy_home(), Path(root).resolve())
+            with patch.dict(os.environ, {'APPDATA': root}):
+                with patch.dict(os.environ):
+                    os.environ.pop('EASYREAD_HJFY_HOME', None)
+                    expected = Path(root) / 'HJFY' if os.name == 'nt' else Path.home() / 'Library/Application Support/HJFY'
+                    self.assertEqual(pdf_reader.default_hjfy_home(), expected.resolve())
+
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory(); self.addCleanup(self.tmp.cleanup)
         self.home = Path(self.tmp.name)

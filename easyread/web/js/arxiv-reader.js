@@ -114,7 +114,7 @@
   PR.$("#cancel").onclick = () => act("cancel");
   PR.$("#jumpAbstract").onclick = () => {
     const target = doc?.querySelector(".ltx_abstract");
-    if (target) { PR.rememberArticleSpot?.(target); target.scrollIntoView({ block: "start" }); }
+    if (target) { PR.rememberArticleSpot?.(target); target.scrollIntoView({ block: "start" });target.tabIndex=-1;target.focus({preventScroll:true}); }
   };
   PR.$("#theme").onclick = () => PR.toggleReaderThemePicker(PR.$("#theme"));
   PR.showChinese = () => { showZh = true; if (doc) { PR.revealVisualTranslations(doc); renderedVisibility = null; } PR.$("#toggleZh").textContent = "隐藏中文"; render(); };

@@ -58,6 +58,15 @@ class AppAccessTests(unittest.TestCase):
         self.assertEqual(200,status);self.assertIn(b'pdf-reader/app.js',reader);self.assertIn(b'pdf-dual/chat.js',reader)
         self.assertNotIn(b'/web/course/',reader)
 
+    def test_login_accessibility_assets_are_public_but_account_code_is_private(self):
+        anonymous=urllib.request.build_opener()
+        self.assertEqual(200,self.request(anonymous,'/login')[0])
+        status,script=self.request(anonymous,'/web/js/common/accessibility.js')
+        self.assertEqual(200,status)
+        self.assertIn(b'focusable',script)
+        self.assertEqual(200,self.request(anonymous,'/web/css/accessibility.css')[0])
+        self.assertEqual(401,self.request(anonymous,'/web/js/common/account-session.js')[0])
+
     def test_direct_access_and_mutations_are_isolated(self):
         for path in ('/read/'+self.pid,'/p/'+self.pid+'/source.pdf','/api/p/'+self.pid+'/state','/api/pdf-reader/'+self.pid+'/state','/api/reading/'+self.pid):
             self.assertIn(self.request(self.b,path)[0],(404,409))

@@ -16,11 +16,11 @@
       const def = s.chat.default === m.id;
       const badge = m.ready === false ? '<span class="badge bad" title="' + PR.esc(m.hint || "") + '">' + PR.esc(m.hint || "还不能用") + "</span>"
         : def ? '<span class="badge ok">新对话默认</span>' : "";
-      return '<div class="mc' + (def ? " on" : "") + (s.editing === m.id ? " editing" : "") + (m.ready === false ? " off" : "") + '" data-cm="default" data-i="' + i + '" role="button" tabindex="0" title="设为新对话默认">' +
-        '<button class="mc-more" data-cm="more" data-i="' + i + '" title="改、删">' + PR.icon("more", "sm") + "</button>" +
-        "<b>" + PR.esc(m.label || m.name) + "</b>" + PR.esc([m.source, m.detail].filter(Boolean).join(" · ")) + badge + "</div>";
+      return '<div class="mc' + (def ? " on" : "") + (s.editing === m.id ? " editing" : "") + (m.ready === false ? " off" : "") + '">' +
+        '<button class="mc-more" data-cm="more" data-i="' + i + '" aria-label="' + PR.esc(m.label || m.name) + '，改名或删除" title="改、删">' + PR.icon("more", "sm") + "</button>" +
+        '<button class="mc-default" data-cm="default" data-i="' + i + '" aria-pressed="' + def + '" title="设为新对话默认"><b>' + PR.esc(m.label || m.name) + "</b>" + PR.esc([m.source, m.detail].filter(Boolean).join(" · ")) + badge + "</button></div>";
     }).join("") +
-      '<div class="mc add' + (s.editing === "new" ? " editing" : "") + '" data-cm="add" role="button" tabindex="0">' + PR.icon("plus") + "<b>添加模型</b>Claude、GPT、免费或付费 API</div></div>";
+      '<button class="mc add' + (s.editing === "new" ? " editing" : "") + '" data-cm="add">' + PR.icon("plus") + "<b>添加模型</b>Claude、GPT、免费或付费 API</button></div>";
   }
 
   function formHtml(s) {

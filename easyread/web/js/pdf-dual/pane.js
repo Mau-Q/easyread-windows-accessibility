@@ -2,17 +2,28 @@
   'use strict';
   const side=window.frameElement.dataset.side,host=parent.Dual,asset=host.assets[side];
   window.pdfAssetId=asset.id;
+  let reader;
+  // PDF.js viewport location describes the first visible page. At low zoom,
+  // that can be the previous page even after explicit page-number navigation.
+  // Keep the logical current page in the toolbar/progress and avoid attaching
+  // the previous page's offsets to it.
+  const currentState=state=>{
+    const number=reader?._primaryView?._iframeWindow?.PDFViewerApplication?.pdfViewer?.currentPageNumber;
+    return number && state.pageIndex!==number-1 ? {...state,pageIndex:number-1,top:undefined,left:undefined} : state;
+  };
   const noop=()=>{},options={type:'pdf',data:{url:location.origin+asset.url},annotations:[],readOnly:true,colorScheme:'light',lightTheme:'light',darkTheme:'light',
     title:asset.label,authorName:'EasyRead',loggedIn:true,sidebarOpen:false,sidebarWidth:200,sidebarView:'outline',
     showAnnotations:true,primaryViewState:host.initialView(side),onSaveAnnotations:noop,onDeleteAnnotations:noop,
-    onChangeViewState:(state,primary)=>{if(primary!==false&&host.assets[side]?.id===asset.id)host.viewChanged(side,state);},
+    onChangeViewState:(state,primary)=>{if(primary!==false&&host.assets[side]?.id===asset.id)host.viewChanged(side,currentState(state));},
     onChangeActiveView:()=>{if(host.assets[side]?.id===asset.id)host.activate(side);},onOpenLink:url=>window.open(url,'_blank','noopener'),onConfirm:()=>false,
     onSetDataTransferAnnotations:(transfer,values)=>transfer.setData('text/plain',values.map(v=>v.text).join('\n'))};
   for(const key of ['onOpenTagsPopup','onAddToNote','onToggleSidebar','onChangeSidebarWidth','onChangeSidebarView','onCopyImage','onSaveImageAs','onRotatePages','onDeletePages','onToggleContextPane','onToolbarShiftTab','onIframeTab','onBringReaderToFront','onTextSelectionAnnotationModeChange','onSaveCustomThemes','onSetZoom','onSetReadAloudVoice','onSetReadAloudStatus','onPurchaseReadAloudCredits','onLogIn','onOpenReadAloudFirstRunPopup'])options[key]=noop;
   const shell=document.createElement('style');shell.textContent='.toolbar,#toolbar{display:none!important}#split-view{top:0!important}.primary-view,.secondary-view{top:0!important}.selection-popup{display:none!important}';document.head.append(shell);
-  const reader=window.createReader(options);window.sampleReader=reader;await reader._primaryView.initializedPromise;
+  reader=window.createReader(options);window.sampleReader=reader;await reader._primaryView.initializedPromise;
   if(host.annotationClicked)shell.textContent+='.annotation-popup{display:none!important}';
   const view=reader._primaryView,doc=view._iframeWindow.document;
+  view._iframe.title=asset.label+' PDF 正文';
+  const focusStyle=doc.createElement('style');focusStyle.textContent='.textLayer:focus-visible{outline:3px solid Highlight;outline-offset:-3px}';doc.head.append(focusStyle);
   parent.PDFTextLayer?.install(view._iframeWindow.PDFViewerApplication,view._iframeWindow);
   const getAction=view.getActionAtPosition.bind(view);
   view.getActionAtPosition=(position,event)=>event.button===0&&event.target?.closest?.('.page')&&!event.target.closest('button,input,textarea')?{action:{type:'selectText'},selectAnnotations:[]}:getAction(position,event);
@@ -81,7 +92,18 @@
     host.annotationClicked(side,pageIndex,x,y,{left:event.clientX+inner.left+outer.left,top:event.clientY+inner.top+outer.top,bottom:event.clientY+inner.top+outer.top,width:0});
     setTimeout(()=>reader._updateState({selectedAnnotationIDs:[],primaryViewAnnotationPopup:null}),0);
   },true);
-  doc.addEventListener('keydown',e=>{if(e.key==='Escape'){doc.getSelection()?.removeAllRanges();host.clearSelection();}else parent.PR.pdfSelectionKeydown?.(e);});
+  let selectionTimer;
+  doc.addEventListener('selectionchange',()=>{
+    clearTimeout(selectionTimer);
+    selectionTimer=setTimeout(()=>{if(dragStart)return;const selected=capture();if(selected)host.selected(selected);},80);
+  });
+  doc.addEventListener('keydown',e=>{
+    if((e.key==='F10'&&e.shiftKey)||e.key==='ContextMenu'){
+      const selected=capture();
+      if(selected){e.preventDefault();e.stopImmediatePropagation();host.selected(selected);parent.document.querySelector('#selectionTools button')?.focus();return;}
+    }
+    if(e.key==='Escape'){doc.getSelection()?.removeAllRanges();host.clearSelection();}else parent.PR.pdfSelectionKeydown?.(e);
+  });
   doc.addEventListener('wheel',()=>host.activate(side),{capture:true,passive:true});
   doc.addEventListener('touchstart',()=>host.activate(side),{capture:true,passive:true});
   doc.addEventListener('scroll',()=>host.clearSelection(),{capture:true,passive:true});
@@ -92,10 +114,12 @@
   const liveView=event=>{
     const location=event?.location||app.pdfViewer._location;
     if(!location||host.assets[side]?.id!==asset.id)return;
-    host.viewChanged(side,{pageIndex:location.pageNumber-1,scale:location.scale,top:location.top,left:location.left},true);
+    host.viewChanged(side,currentState({pageIndex:location.pageNumber-1,scale:location.scale,top:location.top,left:location.left}),true);
   };
   app.eventBus.on('updateviewarea',liveView);
-  window.addEventListener('unload',()=>app.eventBus.off('updateviewarea',liveView),{once:true});
+  app.eventBus.on('pagechanging',liveView);
+  window.addEventListener('unload',()=>{app.eventBus.off('updateviewarea',liveView);app.eventBus.off('pagechanging',liveView);},{once:true});
   liveView();
   await host.paneReady(side,{reader,view,document:doc,capture,assetId:asset.id,liveSync:true});
+  parent.PR.readerShell?.attach(doc);
 })().catch(e=>{const side=window.frameElement?.dataset.side;if(parent.Dual.assets[side]?.id===window.pdfAssetId)parent.Dual.fail(e);});

@@ -3,6 +3,9 @@ rem EasyRead launcher for Windows. First run creates .venv and installs; later r
 setlocal
 cd /d "%~dp0"
 set PYTHONUTF8=1
+if not defined EASYREAD_HOME set "EASYREAD_HOME=%~dp0runtime\windows-dev"
+if not exist "%EASYREAD_HOME%" mkdir "%EASYREAD_HOME%"
+if not exist "%EASYREAD_HOME%\config.json" copy /y "config.example.json" "%EASYREAD_HOME%\config.json" >nul
 if exist ".venv\Scripts\pythonw.exe" goto run
 
 echo Setting up EasyRead (first run only, about a minute)...

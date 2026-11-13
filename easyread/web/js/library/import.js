@@ -9,12 +9,15 @@
   const savePref = (p) => PR.ls.set("easyread-import", Object.assign(pref(), p));
 
   PR.openImport = function (ref) {
+    // The file input must belong to the active modal. An inert input elsewhere
+    // in the page cannot open the real Windows picker through a keyboard click.
+    const fileInput = PR.$('#fileInput'); fileInput.remove();
     const p = pref();
     if (L.pdfDefault || PR.account) { p.auto = false; p.sourceMode = "pdf"; }
     const off = PR.account || L.engine === "none";
     dlg.querySelector(".dialog").innerHTML =
       "<h2>导入论文</h2>" +
-      '<div class="dropzone" id="pick">' + PR.icon("upload") + '<div class="big">选择 PDF，或拖到这里</div><div class="hint">可以一次选多个；同一个文件不会重复导入</div></div>' +
+      '<button type="button" class="dropzone" id="pick">' + PR.icon("upload") + '<div class="big">选择 PDF，或拖到这里</div><div class="hint">可以一次选多个；同一个文件不会重复导入</div></button>' +
       '<div class="or">或者</div>' +
       '<label class="field"><span>链接、arXiv 编号、DOI 或论文标题</span><div class="inline"><input class="input" id="arxivRef" placeholder="2411.00640 · 10.18653/v1/N19-1423 · 论文网页链接 · 论文标题">' +
       '<button class="btn accent" id="arxivGo">导入</button></div></label>' +
@@ -25,6 +28,7 @@
       '<select class="input" id="webScope" hidden>' + [['abstract','先译摘要'],['first:10','前 10 段'],['all','全文']].map(([v,l]) => '<option value="' + v + '"' + (p.webScope === v ? ' selected' : '') + '>' + l + '</option>').join('') + '</select></div>' +
       '<p class="hint" style="margin-top:8px">用 ' + PR.esc(L.engineLabel || "（未设置）") + ' 翻译 · <button class="linkish" id="impEngine">换引擎</button>。长论文可以先译正文，附录之后在详情里点“继续翻译”。</p>' +
       '<div class="actions"><button class="btn" id="impClose">关闭</button></div>';
+    dlg.querySelector('.dialog').appendChild(fileInput); fileInput.inert = false;
     if (PR.account) {
       PR.$("#autoTr").closest("label").innerHTML = "导入仅保存与本地解析；翻译请入库后主动发起并确认发送范围。";
       PR.$("#impEngine").closest("p").hidden = true;

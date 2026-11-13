@@ -116,7 +116,7 @@ def handler_for(base,runtime):
                 except Problem:
                     if not write and path in ('/','/login'):
                         return super()._file(config.WEB/'login.html')
-                    if not write and (path.startswith(('/web/css/','/web/js/common/account-login')) or path=='/web/favicon.svg'):
+                    if not write and (path.startswith(('/web/css/','/web/js/common/account-login')) or path in ('/web/favicon.svg','/web/js/common/accessibility.js')):
                         return self._file_public(path)
                     raise
                 self.app=RequestApp(runtime.user(self.session),self.session)

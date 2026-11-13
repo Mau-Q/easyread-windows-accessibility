@@ -1,0 +1,10 @@
+{
+  "name": "easyread-accessibility-validation",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Isolated native Windows UI validation; no real AI calls",
+  "devDependencies": {
+    "axe-core": "4.14.0",
+    "playwright": "1.65.0"
+  }
+}

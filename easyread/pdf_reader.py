@@ -14,11 +14,18 @@ import threading
 import re
 from pathlib import Path
 from urllib.parse import parse_qs, unquote, urlparse
+from urllib.request import url2pathname
 
 from . import config, pdf_dual, pdf_translation, pdf_chat, chat_store, chat_models, chat_images
 from .store import Workspace, dir_lock, empty_reader, read_json, write_json_atomic
 
 API = "/api/pdf-reader/"
+
+
+def default_hjfy_home():
+    platform_home = (Path(os.environ.get('APPDATA') or Path.home()) / 'HJFY'
+                     if os.name == 'nt' else Path.home() / 'Library/Application Support/HJFY')
+    return Path(os.environ.get('EASYREAD_HJFY_HOME') or platform_home).resolve()
 
 
 class PDFWorkspace(Workspace):
@@ -38,8 +45,7 @@ class Service(pdf_dual.Service):
     def __init__(self, home, library, hjfy_home=None):
         self.root = Path(home).resolve() / ".pdf-reading"
         self.library = library
-        self.hjfy = Path(hjfy_home or os.environ.get("EASYREAD_HJFY_HOME") or
-                         Path.home() / "Library/Application Support/HJFY").resolve()
+        self.hjfy = Path(hjfy_home).resolve() if hjfy_home else default_hjfy_home()
         self.hjfy_models=self.hjfy
         if hasattr(library,'database') and Path(home).resolve()!=library.database.legacy_home:
             # Operator connection settings are shared, historical paper outputs
@@ -62,6 +68,10 @@ class Service(pdf_dual.Service):
 
     def file_hash(self, path):
         path = Path(path)
+        # NTFS ctime is creation time on Python 3.12. A same-size rewrite with
+        # restored mtime would otherwise reuse a stale fingerprint.
+        if os.name == 'nt':
+            return digest(path)
         stat = path.stat()
         key = (str(path.resolve()), stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns, stat.st_ctime_ns)
         if key not in self.hashes:
@@ -153,7 +163,8 @@ class Service(pdf_dual.Service):
         for record in history if isinstance(history, list) else []:
             output = record.get("output") if isinstance(record, dict) else None
             if isinstance(output, str) and urlparse(output).scheme == "file":
-                path = Path(unquote(urlparse(output).path)).resolve()
+                parsed = urlparse(output)
+                path = Path(url2pathname(('//' + parsed.netloc if parsed.netloc else '') + parsed.path)).resolve()
                 timestamp = record.get("finishedAt")
                 if path.is_relative_to(base) and type(timestamp) in (int, float):
                     times[str(path)] = timestamp + 978307200  # Apple reference date.

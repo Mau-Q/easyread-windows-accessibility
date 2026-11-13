@@ -196,10 +196,17 @@ window.PR = window.PR || {};
 
   /* 通用下拉菜单：items = [{label, icon, kbd, fn} | "-"] */
   PR.menu = function (anchorOrPoint, items) {
+    PR.closeMenu();
+    PR._menuReturn = document.activeElement;
     let m = PR.$("#ctxmenu");
-    if (!m) { m = PR.el("div", { id: "ctxmenu", class: "menu" }); document.body.appendChild(m); }
-    m.innerHTML = '<div class="menu-list">' + items.map((it, i) => it === "-" ? "<hr>" :
-      '<button data-i="' + i + '"' + (it.disabled ? " disabled" : "") + ">" + (it.icon ? PR.icon(it.icon, "sm") : "") + "<span>" + PR.esc(it.label) + "</span>" +
+    if (!m) m = PR.el("div", { id: "ctxmenu", class: "menu" });
+    // Menus opened inside a modal belong to that modal's interactive subtree.
+    // A body sibling would correctly become inert with the rest of the background.
+    const owner=PR._menuReturn?.closest('.dialog[aria-modal="true"],dialog[open]')||document.body;
+    owner.appendChild(m);m.inert=false;
+    m.setAttribute('role', 'menu'); m.setAttribute('aria-label', '操作菜单');
+    m.innerHTML = '<div class="menu-list" role="none">' + items.map((it, i) => it === "-" ? '<hr role="separator">' :
+      '<button role="menuitem" tabindex="-1" data-i="' + i + '"' + (it.disabled ? " disabled" : "") + ">" + (it.icon ? PR.icon(it.icon, "sm") : "") + "<span>" + PR.esc(it.label) + "</span>" +
       (it.kbd ? '<span class="kbd">' + PR.esc(it.kbd) + "</span>" : "") + "</button>").join("") + "</div>";
     m.onclick = (e) => {
       const b = e.target.closest("[data-i]"); if (!b) return;
@@ -216,8 +223,23 @@ window.PR = window.PR || {};
     if (y + h > innerHeight - 8) y = Math.max(8, r.top - h - 4);
     m.style.left = Math.max(8, Math.min(innerWidth - w - 8, x)) + "px";
     m.style.top = y + "px";
+    m.querySelector('button:not(:disabled)')?.focus();
+    m.onkeydown = e => {
+      const buttons = [...m.querySelectorAll('button:not(:disabled)')];
+      if (['ArrowDown','ArrowUp','Home','End'].includes(e.key)) {
+        e.preventDefault(); e.stopPropagation();
+        const i = buttons.indexOf(document.activeElement);
+        const next = e.key === 'Home' ? 0 : e.key === 'End' ? buttons.length-1 : (i + (e.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length;
+        buttons[next]?.focus();
+      } else if (e.key === 'Escape' || e.key === 'Tab') { if(e.key === 'Escape') e.preventDefault(); e.stopPropagation(); PR.closeMenu(); }
+    };
   };
-  PR.closeMenu = () => { const m = PR.$("#ctxmenu"); m && m.classList.remove("open"); };
+  PR.closeMenu = () => {
+    const m = PR.$("#ctxmenu");
+    if (!m?.classList.contains('open')) return;
+    const restore = m.contains(document.activeElement); m.classList.remove('open');
+    if(restore) { const e=PR._menuReturn; if(e?.isConnected)e.focus(); else PR.$('#list')?.focus(); }
+  };
   document.addEventListener("mousedown", (e) => { if (!e.target.closest("#ctxmenu")) PR.closeMenu(); });
   document.addEventListener("keydown", (e) => { if (e.key === "Escape") PR.closeMenu(); });
 })(window.PR);

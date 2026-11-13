@@ -98,7 +98,7 @@
       '<a class="btn accent" data-d="read" href="/read/' + i.id + '">' + PR.icon("book", "sm") + readLabel + "</a>" +
       '<a class="btn line" href="' + PR.esc(i.source_kind === "arxiv_html" ? i.url : '/p/' + i.id + '/source.pdf') + '" target="_blank" rel="noopener">' + PR.icon("pdf", "sm") + (i.source_kind === "arxiv_html" ? "打开 arXiv 原网页" : "打开原 PDF") + "</a>" +
       '<div class="act-row"><button class="btn line" data-d="cite" title="复制参考文献格式：GB/T 7714、APA、BibTeX">' + PR.icon("copy", "sm") + "复制引用</button>" +
-      '<button class="btn icon line" data-d="star" title="星标（S）" style="color:' + (i.starred ? "#c9a24a" : "") + '">' + PR.icon("star", "sm").replace('class="i sm"', 'class="i sm"' + (i.starred ? ' style="fill:currentColor"' : "")) + "</button>" +
+      '<button class="btn icon line" data-d="star" aria-pressed="' + String(!!i.starred) + '" title="星标（S）" style="color:' + (i.starred ? "#c9a24a" : "") + '">' + PR.icon("star", "sm").replace('class="i sm"', 'class="i sm"' + (i.starred ? ' style="fill:currentColor"' : "")) + "</button>" +
       '<button class="btn icon line" data-d="more" title="更多：阅读方式、导出、打开文件夹、回收站">' + PR.icon("more", "sm") + "</button></div></div></div>" +
       '<div class="cats">' + cats + '<input id="catInput" placeholder="＋ 新分类" maxlength="30"></div>' +
       '<div class="seg">' + status + "</div>" +

@@ -1,6 +1,6 @@
 # EasyRead：Windows 视障友好适配
 
-本仓库是已有 EasyRead 软件工程课程项目的公开源码快照，用于在 Windows 上继续开发与验证视障友好适配。**当前是适配起点，不是已通过 Windows 或无障碍验收的成品。**
+本仓库基于已有 EasyRead 软件工程课程项目，已进行 Windows 兼容与视障友好适配，并在本机 Tauri 桌面窗口验证键盘、NVDA 输出和系统高对比度。**本机验证范围、真实 AI/外部运行时及人工验收边界见 [Windows 记录](docs/WINDOWS.md)，不宣称已完成教师最终验收。**
 
 应用包含本地文献库、账号隔离、PDF 与网页阅读、分类和搜索、批注与手动笔记、阅读报告及问答等已有功能。此次目标是让这些现有功能可被读屏软件识别、可通过键盘操作，并支持 Windows 系统高对比度；不新增业务功能。
 
@@ -8,17 +8,17 @@
 
 1. 克隆仓库：`git clone https://github.com/Mau-Q/easyread-windows-accessibility.git`。
 2. 阅读 [Windows Codex 交接说明](HANDOFF.md)、[开发约定](AGENTS.md)和[任务书原件](docs/assignment/揭榜任务2-无障碍适配任务书.pdf)。
-3. 按 [Windows 开发与测试说明](docs/WINDOWS.md)先建立隔离的运行基线，再修复平台兼容问题并适配。
-4. 修改前建议建立分支：`git switch -c windows-accessibility`。
+3. 按 [Windows 开发与测试说明](docs/WINDOWS.md)安装依赖并在 `desktop` 执行 `npm ci`、`npm run build`。
+4. 在根目录运行 `start-desktop.cmd`；默认数据位于检出目录下 `runtime/windows-dev`，可先设置独立 `EASYREAD_HOME`。教学平台草稿见 [此处](docs/TEACHING_POST_DRAFT.md)。
 
 ## 已有结构
 
 | 路径 | 内容 |
 |---|---|
 | `easyread/` | Python 后端、HTML/CSS/JS 界面与完整第三方阅读器资源 |
-| `desktop/` | 现有 Tauri 桌面壳、图标、npm/Cargo 锁文件；目前配置面向 macOS |
+| `desktop/` | Tauri 桌面壳、图标与 npm/Cargo 锁文件；Windows 构建和平台分支 |
 | `tests/` | 原有回归测试及已补入的 CR-001 中文题名搜索测试 |
-| `start.cmd` | 已有 Windows Python 服务启动脚本；需在 Windows 实测 |
+| `start.cmd` / `start-desktop.cmd` | Python 服务入口 / 本机 Windows 原生桌面入口 |
 | `config.example.json` | 不含凭据、关闭自动翻译的配置示例 |
 | `docs/assignment/` | 用户提供的课程任务书，作为需求材料保留 |
 
@@ -26,7 +26,7 @@
 
 Python 依赖声明在 `pyproject.toml`，要求 Python 3.10+；接手时建议先使用 3.12。前端为原生 HTML/CSS/JS，不需要另建 React/Vue 项目。第三方 `easyread/web/vendor/` 是运行资源，不能作为缓存删除。
 
-Windows 上可以先运行 Python 服务并用浏览器检查基础功能。Tauri 桌面壳和 PDF 翻译进程管理仍有 Unix/macOS 专用实现，必须修复并实际验证。浏览器可用、自动测试通过或 GitHub Actions 通过，都不代表桌面读屏验收通过。
+Windows 本机已有 Python 234 项管理员整套及新增登录用例定向通过，最终普通权限 235 项中仅符号链接创建受系统权限限制；Node 30 项、Rust 3 项通过，另有实际桌面核心/扩展流程记录。Tauri 和翻译进程管理保留 Unix 分支并增加 Windows 实现。当前 exe 仍依赖源码检出和 Python 虚拟环境，不是完全独立安装器。自动检查、真实 NVDA 输出和人工体验分别记录。
 
 真实 AI 功能依赖使用者自行配置的服务或本机后端；本仓库不附 API Key、模型账户、个人文献、账号数据库或历史阅读记录。初始验证使用新建测试账号和可公开的测试 PDF，不调用真实付费服务。
 

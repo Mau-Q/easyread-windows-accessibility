@@ -34,8 +34,8 @@
       const box = PR.el("div", { class: "popover confirm", role: "dialog" },
         '<div class="cf-title">' + PR.esc(o.title || "") + "</div>" +
         (o.body ? '<div class="cf-body">' + PR.esc(o.body) + "</div>" : "") +
-        (withInput ? '<input class="input cf-input" maxlength="' + (o.max || 60) + '" placeholder="' + PR.esc(o.placeholder || "") + '">' : "") +
-        '<div class="cf-acts"><button class="btn sm" data-cf="no">取消</button><button class="btn sm ' + (o.danger ? "danger-fill" : "accent") + '" data-cf="ok">' + PR.esc(o.ok || "确定") + "</button></div>");
+        (withInput ? '<input aria-label="' + PR.esc(o.title || "输入内容") + '" class="input cf-input" maxlength="' + (o.max || 60) + '" placeholder="' + PR.esc(o.placeholder || "") + '">' : "") +
+        '<div class="cf-acts"><button class="btn sm" data-cf="no">' + PR.esc(o.cancel || '取消') + '</button><button class="btn sm ' + (o.danger ? "danger-fill" : "accent") + '" data-cf="ok">' + PR.esc(o.ok || "确定") + "</button></div>");
       document.body.appendChild(box);
       const inp = box.querySelector(".cf-input");
       if (inp) inp.value = o.value || "";
@@ -44,7 +44,7 @@
       const result = (ok) => (withInput ? (ok ? inp.value.trim() || null : null) : ok);
       const onKey = (e) => {
         if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(result(false)); }
-        else if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); e.stopPropagation(); close(result(true)); }
+        else if (e.key === "Enter" && !e.isComposing && e.target === inp) { e.preventDefault(); e.stopPropagation(); close(result(true)); }
       };
       const onDown = (e) => { if (!box.contains(e.target)) close(result(false)); };
       box.addEventListener("click", (e) => { const b = e.target.closest("[data-cf]"); if (b) close(result(b.dataset.cf === "ok")); });

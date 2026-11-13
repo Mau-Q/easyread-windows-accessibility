@@ -32,7 +32,8 @@ class IntegrationTest(unittest.TestCase):
 
     def fake_engine(self,mode='complete'):
         import sys
-        p=self.runtime/'bin/hjfy-pdf'
+        p=self.runtime/'bin/fixture-engine.py'
+        os.environ['EASYREAD_HJFY_EXECUTABLE']=str(p)
         p.write_text('#!'+sys.executable+'\n'+
             'import sys,shutil,json,time\na=sys.argv\n'+
             ('time.sleep(30)\n' if mode=='slow' else '')+
@@ -44,7 +45,13 @@ class IntegrationTest(unittest.TestCase):
     def wait(self):
         for _ in range(150):
             task=pdf_translation.state(self.ws)
-            if task.get('state') not in pdf_translation.ACTIVE:return task
+            if task.get('state') not in pdf_translation.ACTIVE:
+                # Windows cannot remove supervisor.log until the real worker
+                # has finished unwinding and closed its inherited log handle.
+                import psutil
+                try: psutil.Process(task['supervisor_pid']).wait(timeout=5)
+                except (psutil.NoSuchProcess, KeyError): pass
+                return task
             time.sleep(.04)
         self.fail('fixture task timed out')
 

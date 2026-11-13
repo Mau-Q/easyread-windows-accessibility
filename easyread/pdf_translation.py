@@ -10,6 +10,7 @@ import threading
 import time
 import urllib.request
 import uuid
+import psutil
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -18,6 +19,21 @@ from .store import dir_lock, now_iso, read_json, write_json_atomic
 
 ACTIVE = {"queued", "running", "cancelling"}
 RUNTIME = Path("/Applications/HJFY.app/Contents/Resources/PDFRuntime")
+
+
+def engine_path(runtime):
+    override = os.environ.get("EASYREAD_HJFY_EXECUTABLE")
+    return Path(override) if override else Path(runtime) / "bin" / ("hjfy-pdf.exe" if os.name == "nt" else "hjfy-pdf")
+
+
+def engine_command(runtime):
+    path = engine_path(runtime)
+    return [sys.executable, str(path)] if path.suffix == ".py" else [str(path)]
+
+
+def process_options():
+    return ({"creationflags": subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW}
+            if os.name == "nt" else {"start_new_session": True})
 
 
 def choices(service):
@@ -47,11 +63,12 @@ def state(ws):
                         break
     if task.get("state") in ACTIVE and task.get("supervisor_pid"):
         try:
-            os.kill(task["supervisor_pid"], 0)
-            command = subprocess.run(['ps', '-p', str(task['supervisor_pid']), '-o', 'command='], capture_output=True, text=True, check=False).stdout
-            if str(path.parent / 'input.json') not in command:
-                raise ProcessLookupError()
-        except ProcessLookupError:
+            process = psutil.Process(task["supervisor_pid"])
+            # os.kill(pid, 0) terminates a process on Windows. Check identity too,
+            # so a reused PID cannot make an abandoned task appear alive.
+            if str(path.parent / 'input.json') not in process.cmdline():
+                raise psutil.NoSuchProcess(process.pid)
+        except psutil.NoSuchProcess:
             latest = read_json(path, {}) or {}
             if latest.get('state') not in ACTIVE:
                 return latest
@@ -66,9 +83,12 @@ def start(service, ws, body):
         raise ValueError("请选择已启用的幻觉翻译模型连接")
     if model["provider"] not in ("chat-completions", "responses", "qwen-mt"):
         raise ValueError("该模型协议不受原生引擎支持")
-    runtime = Path(os.environ.get("EASYREAD_HJFY_RUNTIME") or RUNTIME)
-    if not (runtime / "bin/hjfy-pdf").is_file():
-        raise ValueError("找不到幻觉翻译 PDF 引擎，请安装 HJFY")
+    runtime_setting = os.environ.get("EASYREAD_HJFY_RUNTIME")
+    if os.name == "nt" and not runtime_setting:
+        raise ValueError("Windows 上请先设置 EASYREAD_HJFY_RUNTIME，指向对应平台的 PDFRuntime 资源目录")
+    runtime = Path(runtime_setting or RUNTIME)
+    if not engine_path(runtime).is_file():
+        raise ValueError("找不到幻觉翻译 PDF 引擎，请安装对应平台的 HJFY 并设置 EASYREAD_HJFY_RUNTIME")
     o = config.load().get("openai", {})
     local = urlparse(model["base_url"]).hostname in ("localhost", "127.0.0.1", "::1")
     key = o.get("api_key", "") if o.get("base_url", "").rstrip("/") == model["base_url"].rstrip("/") else ""
@@ -117,7 +137,7 @@ def start(service, ws, body):
         env["PYTHONPATH"] = str(Path(__file__).resolve().parent.parent)
         with (folder / "supervisor.log").open("wb") as log:
             proc = subprocess.Popen([sys.executable, "-B", "-m", "easyread.pdf_translation", str(folder / "input.json")],
-                                    stdout=log, stderr=log, env=env, start_new_session=True)
+                                    stdout=log, stderr=log, env=env, **process_options())
         # Worker waits until the pointer is committed before updating task.json.
         task["supervisor_pid"] = proc.pid; write_json_atomic(folder / "task.json", task)
         write_json_atomic(ws.root / "translation-task.json", {"id": run_id})
@@ -153,6 +173,13 @@ def completed(ws):
 
 def stop_group(proc):
     if proc and proc.poll() is None:
+        if os.name == "nt":
+            result = subprocess.run(["taskkill", "/PID", str(proc.pid), "/T", "/F"],
+                                    capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW)
+            if result.returncode and proc.poll() is None:
+                raise RuntimeError("无法结束翻译进程树：" + result.stderr.decode(errors="replace"))
+            proc.wait(timeout=5)
+            return
         try:
             os.killpg(proc.pid, signal.SIGTERM)
             proc.wait(timeout=5)
@@ -190,13 +217,13 @@ def run(spec_path):
         # Serialize users of one local bridge so one job cannot stop a bridge
         # still borrowed by another PDF supervisor. The lock survives restarts.
         if spec.get('bridge_start'):
-            import fcntl
+            from .process_lock import try_lock
             name = hashlib.sha256(bridge_connection['base_url'].encode()).hexdigest()[:16]
             lock_root=Path(spec.get('bridge_lock_root') or folder.parent.parent.parent)
             connection_lock = (lock_root / ('bridge-' + name + '.lock')).open('a')
             while True:
                 try:
-                    fcntl.flock(connection_lock, fcntl.LOCK_EX | fcntl.LOCK_NB); break
+                    try_lock(connection_lock); break
                 except BlockingIOError:
                     save(state='queued', message='等待本地翻译连接')
                     if (folder / 'cancel').exists(): raise InterruptedError()
@@ -210,7 +237,7 @@ def run(spec_path):
             if not alive():
                 bridge_log = (folder / "bridge.log").open('wb')
                 bridge = subprocess.Popen([sys.executable, "-B", spec["bridge_start"]], stdout=bridge_log, stderr=bridge_log,
-                                          start_new_session=True)
+                                          **process_options())
                 for _ in range(100):
                     if alive(): break
                     if bridge.poll() is not None: raise ValueError("本地 Codex 桥接启动失败")
@@ -218,7 +245,7 @@ def run(spec_path):
                     time.sleep(.2)
                 else: raise ValueError("本地 Codex 桥接没有就绪")
         if (folder / "cancel").exists(): raise InterruptedError()
-        args = [str(Path(spec["runtime"]) / "bin/hjfy-pdf"), str(source),
+        args = engine_command(spec["runtime"]) + [str(source),
                 "--resource-root", spec["runtime"], "--provider", connection["provider"],
                 "--base-url", connection["base_url"], "--model", connection["model"],
                 "--api-key-env", "EASYREAD_NATIVE_API_KEY", "--target-language", "zh-Hans",
@@ -229,7 +256,7 @@ def run(spec_path):
         write_json_atomic(folder / "command.json", args)
         save(state="running", message="幻觉翻译处理中")
         with (folder / "stderr.log").open('wb') as err:
-            native = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=err, text=True, start_new_session=True)
+            native = subprocess.Popen(args, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=err, text=True, encoding="utf-8", **process_options())
             events = []
             def consume():
                 with (folder / "events.jsonl").open('w') as stream:

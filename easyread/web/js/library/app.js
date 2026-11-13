@@ -99,7 +99,7 @@
     const tags = (i.tags || []).slice(0, 3).map((t) => '<span class="chip cat">' + PR.icon("folder", "sm") + PR.esc(t) + "</span>").join("") + ((i.tags || []).length > 3 ? '<span class="chip" title="' + PR.esc(i.tags.slice(3).join("、")) + '">+' + (i.tags.length - 3) + "</span>" : "");
     const notes = i.notes + i.highlights ? '<span class="stat">' + PR.icon("note", "sm") + (i.notes + i.highlights) + (i.open_questions ? " · " + i.open_questions + " 问待答" : "") + "</span>" : "";
     const prog = i.progress ? '<span class="progress-label">读到 ' + Math.round(i.progress * 100) + '%</span><div class="meter" title="阅读进度 ' + Math.round(i.progress * 100) + '%"><i style="width:' + Math.round(i.progress * 100) + '%"></i></div>' : "";
-    return '<div class="row' + (L.selected === i.id ? " on" : "") + '" data-id="' + i.id + '" role="option" aria-selected="' + (L.selected === i.id) + '" draggable="true">' +
+    return '<div class="row' + (L.selected === i.id ? " on" : "") + '" id="paper-' + i.id + '" data-id="' + i.id + '" role="option" aria-selected="' + (L.selected === i.id) + '" draggable="true">' +
       '<div><div class="t1">' + (i.starred ? '<span class="star">' + PR.icon("star") + "</span>" : "") + '<span class="paper-title" title="' + PR.esc(title) + '">' + PR.esc(title) + "</span></div>" + sub +
       '<div class="t3">' + bits.map((b) => "<span>" + PR.esc(String(b)) + "</span>").join("<span>·</span>") + tags + "</div></div>" +
       '<div class="side-info">' + statusPill(i) + prog + L.jobLine(i) + notes + "</div></div>";
@@ -112,7 +112,8 @@
     PR.$("#viewTitle").textContent = L.tag ? L.tag : view[1] + (L.view === "all" ? "论文" : "");
     PR.$("#count").textContent = list.length + " 篇";
     PR.$("#list").innerHTML = list.length ? list.map(rowHtml).join("") : emptyHtml();
-    if (L.selected && !L.byId(L.selected)) L.select(null);
+    PR.$("#list").setAttribute?.('role', list.length ? 'listbox' : 'region');
+    if (L.selected && !list.some(i=>i.id===L.selected)) L.select(null);
     else PR.renderDetail && PR.renderDetail();
   };
   function emptyHtml() {
@@ -148,10 +149,16 @@
   PR.$("#engineChip").onclick = () => PR.openSettings();
 
   L.select = function (id) {
+    if(id && L.byId(id) && !filtered().some(i=>i.id===id)) {
+      L.q='';L.tag=null;L.view='all';PR.$('#q').value='';L.render();
+    }
     if (L.selected !== id) L.detailEditing = false;
     L.selected = id;
     PR.$(".lib").classList.toggle("has-detail", !!id);
     PR.$$(".row").forEach((r) => (r.classList.toggle("on", r.dataset.id === id), r.setAttribute("aria-selected", String(r.dataset.id === id))));
+    const listbox = PR.$("#list");
+    if (id) listbox.setAttribute("aria-activedescendant", "paper-" + id);
+    else listbox.removeAttribute("aria-activedescendant");
     PR.renderDetail && PR.renderDetail();
   };
 
@@ -180,7 +187,7 @@
   /* ---------- 事件 ---------- */
   PR.$("#list").addEventListener("click", (e) => {
     const r = e.target.closest(".row");
-    if (r) L.select(r.dataset.id);
+    if (r) { L.select(r.dataset.id); PR.$("#list").focus(); }
   });
   /* 点列表空白处、侧栏、标题栏空白：收起右侧详情 */
   document.addEventListener("click", (e) => {
@@ -208,11 +215,15 @@
     const rows = PR.$$(".row");
     const idx = rows.findIndex((r) => r.dataset.id === L.selected);
     if (e.key === "/" || (e.key === "k" && (e.ctrlKey || e.metaKey))) { e.preventDefault(); PR.$("#q").focus(); }
-    else if (e.key === "ArrowDown" || e.key === "j") { e.preventDefault(); const r = rows[Math.min(rows.length - 1, idx + 1)]; if (r) { L.select(r.dataset.id); r.scrollIntoView({ block: "nearest" }); } }
-    else if (e.key === "ArrowUp" || e.key === "k") { e.preventDefault(); const r = rows[Math.max(0, idx - 1)]; if (r) { L.select(r.dataset.id); r.scrollIntoView({ block: "nearest" }); } }
-    else if (e.key === "Enter" && L.selected) L.openReader(L.selected);
-    else if (e.key === "Escape") L.select(null);
-    else if (e.key === "s" && L.selected) { const it = L.byId(L.selected); L.patch(it.id, { starred: !it.starred }); }
+    else if (e.target.id === "list") {
+      if (["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) {
+        e.preventDefault();
+        const next = e.key === "Home" ? 0 : e.key === "End" ? rows.length-1 : e.key === "ArrowDown" ? Math.min(rows.length-1,idx+1) : Math.max(0,idx-1);
+        const r=rows[next]; if(r) { L.select(r.dataset.id); r.scrollIntoView({block:"nearest"}); }
+      } else if (e.key === "Enter" && L.selected) { e.preventDefault(); L.openReader(L.selected); }
+      else if ((e.key === "F10" && e.shiftKey || e.key === "ContextMenu") && L.selected) { e.preventDefault(); PR.rowMenu?.(L.selected,PR.$("#list")); }
+      else if (e.key === "Escape") L.select(null);
+    }
   });
 
   PR.onSettingsSaved = () => L.load();
