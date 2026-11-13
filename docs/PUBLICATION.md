@@ -28,6 +28,8 @@
 - TOOL_OBSERVED：公开文件与原本地配置中非空凭据做精确值比对，无匹配；未输出凭据值。`python scripts/check_public_tree.py` 通过，禁止配置文件及合成令牌的负向检查通过。
 - TOOL_OBSERVED：自有文件的 Git 差异格式检查通过。第三方文件原有行尾空白保持原样，未为消除格式提示改写其代码或许可证。
 - 原扫描日志及测试日志仅本机保留；不将旧日志、个人路径或凭据写入公共材料。上述是本机扫描与回归结果，不能保证检测所有未知秘密，也不代表 Windows 或无障碍验收。
+- TOOL_OBSERVED：首次公开提交 `3043da5a8019c0447746969955dc28fcc7c8efaa` 的远端 545 个文件与本地 Git 树逐项一致；任务书与 HANDOFF 的匿名下载内容和本地副本相同。仓库已确认为 PUBLIC。
+- EXTERNAL_DEPENDENCY：首次 [GitHub Actions 运行](https://github.com/Mau-Q/easyread-windows-accessibility/actions/runs/43349953637) 被 GitHub 账号账单锁定阻止，作业没有执行任何测试步骤。该失败状态不表示应用测试已失败或已通过。需账号所有者处理 GitHub Billing 后再恢复云端回归；本次不重复触发、不修改账单设置。
 
 后续发布前可安装 Gitleaks 并在仓库根目录运行 `gitleaks dir . --config .gitleaks.toml --redact=100` 及 `gitleaks git . --config .gitleaks.toml --redact=100`，分别检查工作区和拟公开 Git 历史。
 

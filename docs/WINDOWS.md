@@ -12,6 +12,8 @@
 | 纯键盘、焦点与系统高对比度 | NOT_RUN |
 | 真实 AI 服务、原生 PDF 翻译外部环境 | NOT_RUN；未随仓库提供 |
 
+首次 GitHub Actions 被账号账单锁定阻止，所有测试作业在执行步骤前就停止；见 [公开整理记录](PUBLICATION.md)。云端测试没有产生 Windows 通过或失败证据。先在接手电脑运行本地验证，账号所有者处理账单阻塞后再恢复云端测试；不因该阻塞删除测试或伪造通过。
+
 ## 环境和隔离启动
 
 Python 建议先用 3.12。基础服务不需要编译 Tauri。桌面开发需 Node.js/npm、Rust MSVC 工具链、Microsoft C++ Build Tools（C++ 桌面开发和 Windows SDK）以及 WebView2。参考 <https://v2.tauri.app/start/prerequisites/>，安装时按实际 Windows 架构选择。
