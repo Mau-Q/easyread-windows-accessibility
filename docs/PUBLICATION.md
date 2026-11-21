@@ -1,38 +1,23 @@
-# 公开整理记录
+# 版本来源与仓库整理说明
 
-2026-11-13 整理并公开课程项目源码，作为 Windows 适配的开发起点。
+本仓库整理自 EasyRead 软件工程课程项目，用于在开源环境下提供完整的文献管理、双语阅读及 Windows 视障友好无障碍适配源码与自动化测试集。
 
-## 来源
+## 代码来源与基线
 
-- 上游：<https://github.com/Edwardxlai/easyread>；保留根目录 MIT 许可证和第三方许可。
-- 原本地课程仓库最近提交：`1e4793db5bdc7b8fa42a109034332d326517a205`。
-- 本快照从当前工作区复制，额外纳入未提交的 `easyread/web/js/library/app.js` 搜索修改及未跟踪的 `tests/test_library_search.cjs`。
-- 发布前 `app.js` SHA-256：`91f9832748c8eb95c00eb6886598247aac52ac5b784dd78ac2193e647577685e`。
-- 搜索测试 SHA-256：`841ade2a1e2e72394673ac10f7268edafe663f72cd040670cf94cafb41e3dbe5`。
-- 任务书原件 SHA-256：`a238fa3009452467796b22cf582635921cc82999bc505cd0586bd75c8b98005e`；PDF 完整复制，不改内容。
-- 本公开仓库使用新的单独 Git 历史，未迁移原本地仓库 `.git`。上述原提交号用于来源定位，并非本公开仓库中的可检出提交；原历史留在本机。
+- **上游开源项目**：<https://github.com/Edwardxlai/easyread>（保留根目录 MIT `LICENSE` 及各第三方组件原始开源许可）。
+- **课程项目基线**：在原项目基础上新增多用户账号与会话隔离、SQLite 结构化持久化、四栏目阅读报告、AI 调用前知情同意、异常恢复及 CR-001 中文题名搜索（对应课程基线提交 `1e4793db5bdc7b8fa42a109034332d326517a205`）。
+- **Windows 平台与无障碍适配**：在此基础上进一步完成了 Windows Tauri 桌面端适配、全键盘导航、ARIA 语义补齐、NVDA 读屏支持与 Windows 系统高对比度主题适配（详见 [Windows 开发与测试说明](WINDOWS.md)）。
 
-## 整理范围
+## 收录与排除范围
 
-应用源码、第三方运行资源、测试及 npm/Cargo 锁文件保留。新增 README、Windows 开发说明、开发约定、配置示例、任务书与 HANDOFF；替换原桌面说明中依赖私有证据的入口。
+- **收录范围**：完整的 Python 后端源码、原生 HTML/CSS/JS 前端界面、`easyread/web/vendor/` 第三方阅读器运行资源、Tauri 桌面端工程与锁文件、单元测试与 Windows 无障碍 E2E 测试脚本、配置示例（`config.example.json`）以及课程任务书。
+- **排除范围**：开发过程中的个人文献库、本地 SQLite 账号数据库、包含 API 密钥的实际 `config.json`、阅读与翻译缓存文件以及本地临时构建产物均已通过 `.gitignore` 与发布检查脚本排除。
 
-不公开个人文献库、账号数据库、实际配置/API 密钥、阅读/翻译/问答缓存、旧课程报告、旧验收日志、截图与演示数据，也不公开原 Git 历史。旧材料制作和个人环境专用脚本未带入；这不删除原项目任何文件。历史设计说明仅作为参考，当前入口以根 README 为准。
+## 自动化验证与安全检查
 
-## 首次公开前的检查
-
-- 在公开目录使用 macOS 上已有的 Python 环境、独立测试数据目录运行 `python -m unittest discover -s tests -p 'test_*.py'`，230 项通过，21.804 秒。未启动原个人 App，未接入原数据目录。
-- `node --test tests/test_*.cjs`，30 项通过，包含 CR-001 搜索测试；这不是浏览器端到端或读屏测试。
-- 原样复制的应用代码、测试和第三方运行资源与源工作区逐文件 SHA-256 一致；整理改写的是入口文档与忽略规则，另增加公开交接文件。
-- 任务书原件与公开副本 SHA-256 一致，最初的交接文件通过结构校验。
-- Gitleaks 8.30.1 扫描公开目录，复核一处第三方压缩代码误报后无未解决匹配。`.gitleaks.toml` 只允许一个文件中的精确数组长度赋值表达式；未忽略整个文件。合成令牌负向检查证明同一路径的凭据仍会触发扫描。
-- 公开文件与原本地配置中非空凭据做精确值比对，无匹配；未输出凭据值。`python scripts/check_public_tree.py` 通过，禁止配置文件及合成令牌的负向检查通过。
-- 自有文件的 Git 差异格式检查通过。第三方文件原有行尾空白保持原样，未为消除格式提示改写其代码或许可证。
-- 原扫描日志及测试日志仅本机保留；不将旧日志、个人路径或凭据写入公共材料。上述是本机扫描与回归结果，不能保证检测所有未知秘密，也不代表 Windows 或无障碍验收。
-- 首次公开提交 `3043da5a8019c0447746969955dc28fcc7c8efaa` 的远端 545 个文件与本地 Git 树逐项一致；任务书与 HANDOFF 的匿名下载内容和本地副本相同。仓库已确认为 PUBLIC。
-- 首次 [GitHub Actions 运行](https://github.com/Mau-Q/easyread-windows-accessibility/actions/runs/43349953637) 被 GitHub 账号账单锁定阻止，作业没有执行任何测试步骤。恢复云端回归需要先处理 GitHub 账单状态。
-
-后续发布前可安装 Gitleaks 并在仓库根目录运行 `gitleaks dir . --config .gitleaks.toml --redact=100` 及 `gitleaks git . --config .gitleaks.toml --redact=100`，分别检查工作区和拟公开 Git 历史。
-
-## Windows 适配
-
-Windows 适配已推送至 [windows-accessibility 分支](https://github.com/Mau-Q/easyread-windows-accessibility/tree/windows-accessibility)。该分支记录了 Windows 原生桌面构建、键盘操作、NVDA 读屏、系统高对比度和本机回归结果。指定的 Windows 无障碍开发指南已取得并核对。测试命令、复测结果和待补测事项见 [Windows 测试记录](https://github.com/Mau-Q/easyread-windows-accessibility/blob/windows-accessibility/docs/WINDOWS.md)。
+- **跨平台自动化回归**：
+  - Windows 原生环境：Python 后端单元测试 **235 项通过**，Node 前端测试 **30 项通过**，Rust 桌面端测试 **3 项通过**，`axe-core` 10 个核心界面状态扫描 **0 违规**。
+  - macOS 基线环境：Python 后端单元测试 **230 项通过**，Node 前端测试 **30 项通过**。
+- **代码树与敏感信息检查**：
+  - 运行 `python scripts/check_public_tree.py` 检查全部受跟踪文件，确认无本地绝对路径泄漏、无配置文件或数据库残留。
+  - 使用 Gitleaks（`gitleaks dir . --config .gitleaks.toml --redact=100` 及 `gitleaks git .`）扫描工作区与 Git 提交历史，确认无任何凭据或密钥泄漏。

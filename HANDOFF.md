@@ -1,14 +1,13 @@
-# EasyRead 开发交接
+# EasyRead 开发与验证指引
 
-Windows 适配在 [windows-accessibility 分支](https://github.com/Mau-Q/easyread-windows-accessibility/tree/windows-accessibility)。该分支在 Windows 桌面上验证了键盘操作、NVDA 读屏和系统高对比度。启动步骤、复测命令和补测条件见 [Windows 开发与测试记录](https://github.com/Mau-Q/easyread-windows-accessibility/blob/windows-accessibility/docs/WINDOWS.md)。
+本仓库包含 EasyRead 论文管理与 AI 阅读系统的完整源码及 Windows 视障友好无障碍适配实现。详细的环境配置、架构修复点、复现命令与测试结果见 [Windows 开发与测试说明](docs/WINDOWS.md)。
 
-## 开始开发
+## 快速开始
 
-- 先查看当前分支和工作区改动。跟着测试记录启动桌面程序，用独立的 EASYREAD_HOME 和测试账号。
-- 保留原有 Python 服务、Web 界面和 Tauri 桌面壳。适配范围以 [任务书](docs/assignment/揭榜任务2-无障碍适配任务书.pdf) 为准，重点检查控件名称、角色、状态、键盘操作、焦点和高对比度。
-- 测试时记录系统和工具版本、操作步骤、结果及复测情况。浏览器和自动检查的结果应单独记录。用 NVDA 检查桌面正文、工具栏与面板之间的焦点，以及双栏 PDF 的朗读顺序。
-- 提交前按 [开发约定](AGENTS.md) 检查公开文件。使用合成样本或公开论文，测试账号、服务凭据和原始日志保存在本机。
+- **环境隔离**：开发与测试时建议通过 `EASYREAD_HOME` 指定独立的数据目录（`start-desktop.cmd` 默认使用 `runtime/windows-dev`），使用新建测试账号与公开论文样本进行验证。
+- **架构组成**：系统由 Python 本地后端服务、原生 HTML/CSS/JS 前端界面和 Tauri 桌面端壳层组成。无障碍适配围绕《Windows 应用无障碍可访问性开发指南》展开，重点覆盖控件名称/角色/状态语义、全键盘导航、焦点管理与 Windows 系统高对比度主题。
+- **验证维度**：除运行 Python、Node 与 Rust 自动化回归测试外，桌面端无障碍验证结合 NVDA 读屏软件与 `axe-core` 进行，重点验证工具栏、PDF/网页正文与侧边面板之间的 `F6` 焦点往返以及双栏 PDF 的连续朗读顺序。
 
-## 来源
+## 版本与许可
 
-[公开整理记录](docs/PUBLICATION.md) 保存了源码来源、首次公开检查和任务书指纹。任务书原件的 SHA-256 为 a238fa3009452467796b22cf582635921cc82999bc505cd0586bd75c8b98005e。
+项目基于 [Edwardxlai/easyread](https://github.com/Edwardxlai/easyread)（MIT License）扩展开发。第三方依赖与许可证详情见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)，版本基线说明见 [docs/PUBLICATION.md](docs/PUBLICATION.md)。

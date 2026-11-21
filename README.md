@@ -1,39 +1,63 @@
 # EasyRead：Windows 视障友好适配
 
-本仓库基于已有 EasyRead 软件工程课程项目，已进行 Windows 兼容与视障友好适配，并在本机 Tauri 桌面窗口验证键盘、NVDA 输出和系统高对比度。教师验收已登记为完成。测试结果和复测步骤见 [Windows 测试记录](docs/WINDOWS.md)。
+EasyRead 是一款面向文献阅读与管理的桌面应用，提供本地文献库、多账号隔离、PDF 与网页双语阅读、分类与检索、批注与手动笔记、结构化阅读报告及论文内问答等功能。
 
-应用包含本地文献库、账号隔离、PDF 与网页阅读、分类和搜索、批注与手动笔记、阅读报告及问答等已有功能。此次目标是让这些现有功能可被读屏软件识别、可通过键盘操作，并支持 Windows 系统高对比度；不新增业务功能。
+本仓库在原有课程项目基础上完成了 **Windows 平台兼容性改造与视障友好无障碍适配**，并已在 Windows 原生 Tauri 桌面环境中完成全键盘导航、NVDA 读屏朗读及 Windows 系统高对比度主题验证。
+
+## 核心无障碍适配特性
+
+- **Windows 原生桌面运行与进程管理**：适配 Windows Python 虚拟环境发现、进程树生命周期清理、无控制台子进程调度、`msvcrt` 文件锁、原生外部链接打开及 `.mjs` 模块 MIME 映射。
+- **控件可访问语义（名称 / 角色 / 状态）**：为输入框、图标按钮、可编辑字段、文献列表、任务状态及阅读器正文 `iframe` 补齐 ARIA 语义属性，实现列表 `aria-activedescendant` 焦点与实际选中项同步。
+- **全键盘操作与焦点管理**：支持文献分类管理、上下文菜单（`Shift+F10`）、六个设置页、模型列表增删改、确认弹窗及会话切换的纯键盘操作；模态弹窗启用背景 `inert` 与焦点限制，关闭后自动恢复原焦点。
+- **阅读器跨区导航与正文定位**：支持 `F6` / `Shift+F6` 在顶部工具栏、PDF/网页正文与侧边面板之间循环切换；支持选文后按 `Shift+F10` 唤出批注工具栏，点击目录、摘要、批注或报告引用后自动将焦点移入对应正文位置。
+- **高对比度主题与低视力支持**：适配 Windows 系统高对比度主题（`forced-colors`）下的文字、边框、选中态与键盘焦点样式，支持 200% 页面缩放并修复低缩放比例下的逻辑页码同步。
 
 ## 在 Windows 上运行
 
-1. 克隆仓库：`git clone --branch windows-accessibility https://github.com/Mau-Q/easyread-windows-accessibility.git`。
-2. 阅读 [开发交接](HANDOFF.md)、[开发约定](AGENTS.md)和[任务书原件](docs/assignment/揭榜任务2-无障碍适配任务书.pdf)。
-3. 按 [Windows 开发与测试说明](docs/WINDOWS.md)安装依赖并在 `desktop` 执行 `npm ci`、`npm run build`。
-4. 在根目录运行 `start-desktop.cmd`；默认数据位于检出目录下 `runtime/windows-dev`，可先设置独立 `EASYREAD_HOME`。教学平台草稿见 [此处](docs/TEACHING_POST_DRAFT.md)。
+1. 克隆仓库：
+   ```powershell
+   git clone https://github.com/Mau-Q/easyread-windows-accessibility.git
+   cd easyread-windows-accessibility
+   ```
+2. 创建 Python 3.12 虚拟环境并安装后端依赖：
+   ```powershell
+   py -3.12 -m venv .venv
+   .\.venv\Scripts\python.exe -m pip install -e .
+   ```
+3. 安装前端与桌面端依赖并构建原生桌面程序：
+   ```powershell
+   cd desktop
+   npm ci
+   npm run build
+   cd ..
+   ```
+4. 启动桌面应用：
+   ```powershell
+   .\start-desktop.cmd
+   ```
+   默认运行数据保存在 `runtime/windows-dev` 目录下（可通过环境变量 `EASYREAD_HOME` 指定独立的数据目录）。详细构建与测试说明见 [Windows 开发与测试记录](docs/WINDOWS.md)，教学平台提交说明见 [适配总结](docs/TEACHING_POST_DRAFT.md)。
 
-## 已有结构
+## 目录结构
 
-| 路径 | 内容 |
+| 路径 | 说明 |
 |---|---|
-| `easyread/` | Python 后端、HTML/CSS/JS 界面与完整第三方阅读器资源 |
-| `desktop/` | Tauri 桌面壳、图标与 npm/Cargo 锁文件；Windows 构建和平台分支 |
-| `tests/` | 原有回归测试及已补入的 CR-001 中文题名搜索测试 |
-| `start.cmd` / `start-desktop.cmd` | Python 服务入口 / 本机 Windows 原生桌面入口 |
-| `config.example.json` | 不含凭据、关闭自动翻译的配置示例 |
-| `docs/assignment/` | 用户提供的课程任务书，作为需求材料保留 |
+| `easyread/` | Python 后端服务、HTML/CSS/JS 前端界面、无障碍支持模块与阅读器资源 |
+| `desktop/` | Tauri 桌面端壳层（支持 Windows 与 macOS 构建及平台进程管理） |
+| `tests/` | Python 后端回归测试、Node 前端测试及 Windows 无障碍/NVDA 自动化测试脚本 |
+| `start.cmd` / `start-desktop.cmd` | Windows 本地后端服务启动脚本 / 原生桌面应用启动脚本 |
+| `config.example.json` | 默认配置模板 |
+| `docs/WINDOWS.md` | Windows 平台适配细节、测试环境、复现命令与实测结果记录 |
+| `docs/assignment/` | 课程无障碍适配任务书 |
 
-## 运行范围
+## 实测验证概览
 
-Python 依赖声明在 `pyproject.toml`，要求 Python 3.10+；接手时建议先使用 3.12。前端为原生 HTML/CSS/JS，不需要另建 React/Vue 项目。第三方 `easyread/web/vendor/` 是运行资源，不能作为缓存删除。
+在 Windows x64（10.0.26300）原生桌面环境下已完成以下验证（详见 [docs/WINDOWS.md](docs/WINDOWS.md)）：
 
-Windows 本机已通过 Python 235 项管理员回归、Node 30 项和 Rust 3 项。桌面核心流程、NVDA、系统高对比度、本地真实文本模型和 Zotero 重排候选均已实测。Tauri 和翻译进程管理保留 Unix 分支并增加 Windows 实现。当前 exe 依赖源码检出和 Python 虚拟环境。读屏测试已完成。HJFY 的 macOS 测试状态和 Windows 启动结果见 [测试记录](docs/WINDOWS.md#测试与提交状态)。
+- **自动化回归测试**：Python 后端单元测试 **235 项全部通过**，Node 前端测试 **30 项全部通过**，Rust 桌面壳层测试 **3 项全部通过**。
+- **NVDA 读屏实测**：基于 NVDA 2026.3.1 实测控件名称与角色播报、双栏两页合成 PDF（20 段正文）跨栏连续朗读顺序，以及公开 BERT 论文从首页进入摘要、引言与相关工作的连续朗读。
+- **全键盘与系统高对比度**：覆盖登录、导入、搜索、分类、设置、阅读翻页、划线批注、笔记保存、原生文件打开/另存为对话框及 Windows“夜空”高对比度主题；`axe-core` 对 10 个核心界面状态扫描均为 **0 违规（0 violations）**。
+- **AI 阅读与重排流程**：基于本地模型完成四栏目阅读报告生成、带引用问答、图片问答与选词翻译验证，并通过 Zotero `document-worker` 完成双栏 PDF 结构化重排映射验证。
 
-真实 AI 功能依赖使用者自行配置的服务或本机后端；本仓库不附 API Key、模型账户、个人文献、账号数据库或历史阅读记录。初始验证使用新建测试账号和可公开的测试 PDF，不调用真实付费服务。
+## 来源与开源许可
 
-## 来源与公开边界
-
-项目基于 [Edwardxlai/easyread](https://github.com/Edwardxlai/easyread)，保留原 MIT [LICENSE](LICENSE)。本地扩展及课程改造是在上游基础上的后续工作，不声称所有代码均为原创。第三方组件遵循各自许可证，详见 [第三方说明](THIRD_PARTY_NOTICES.md)。任务书是课程材料，不因放在本仓库而改授 MIT 许可。
-
-本次使用经过筛选的当前源码新建 Git 历史，原私有工作区与旧 Git 历史未上传。来源版本、纳入的未提交改动、排除范围和实际验证见 [公开整理记录](docs/PUBLICATION.md)。历史设计说明反映各自编写时状态，当前代码及实际测试优先。
-
-课程最终提交仍需在教学平台发布主贴，包含修改点、测试工具和实际效果；仓库链接不能替代主贴。标题按任务书要求填写，截止时间以课程通知为准。
+本项目基于 [Edwardxlai/easyread](https://github.com/Edwardxlai/easyread)（MIT [LICENSE](LICENSE)）扩展开发。内置第三方阅读器与前端组件遵循各自开源许可证，详见 [第三方许可说明](THIRD_PARTY_NOTICES.md)；版本基线与仓库整理记录见 [版本说明](docs/PUBLICATION.md)。

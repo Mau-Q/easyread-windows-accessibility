@@ -1,11 +1,23 @@
-# EasyRead 桌面壳
+# EasyRead 桌面端壳层（Tauri）
 
-现有实现使用 Tauri 窗口与菜单，启动同一 Python 服务，加载原文献库与阅读器。本轮已修复 Windows 平台分支并在原生桌面运行验证；范围和外部验收边界见 [Windows 记录](../docs/WINDOWS.md)。
+`desktop/` 目录包含基于 Tauri 2 的原生桌面窗口与系统菜单实现，负责在启动时自动拉起或连接本地 Python 后端服务，并承载文献库与阅读器界面。目前已完整支持 Windows 与 macOS 双平台构建及运行。
 
-Windows 在 desktop 运行 `npm ci`、`npm run build`，然后在仓库根目录运行 `start-desktop.cmd`。默认数据在检出目录下 runtime/windows-dev，可设置独立 EASYREAD_HOME。
+## Windows 构建与启动
 
-macOS 原有 `desktop/build.command` 保留，它包含专用复制与签名步骤；`npm run build:mac` 保留 app bundle 构建。Windows 的 build 使用 --no-bundle，不生成名不副实的独立安装器。
+在完成根目录 Python 虚拟环境（`.venv`）安装后，执行以下命令构建并启动 Windows 桌面端：
 
-当前桌面壳依赖项目本地 `.venv`，不是内置 Python 的独立安装器。生成桌面二进制不自动证明 Python 运行时与依赖已经被打包。先完成源码开发及桌面功能/无障碍验证，再依据实际交付需要决定是否制作独立安装包。
+```powershell
+cd desktop
+npm ci
+npm run build
+cd ..
+.\start-desktop.cmd
+```
 
-`EASYREAD_HOME` 用于独立测试数据目录；`EASYREAD_PROJECT_ROOT` 可指定代码目录。交接仓库不包含原 App、个人数据、旧截图或历史验收日志。
+`start-desktop.cmd` 默认将应用数据目录 `EASYREAD_HOME` 指向 `runtime/windows-dev`（也可在启动前自定义 `EASYREAD_HOME` 环境变量），并将 WebView2 用户数据目录置于同一隔离路径下。
+
+## 跨平台构建说明
+
+- **Windows**：`npm run build` 调用 `tauri build --no-bundle` 生成原生可执行程序，配合项目目录内的 `.venv` Python 虚拟环境运行。
+- **macOS**：保留 `desktop/build.command` 与 `npm run build:mac`（`tauri build --bundles app`），支持生成 macOS `.app` 应用包。
+- **环境变量**：`EASYREAD_HOME` 用于指定数据存储目录；`EASYREAD_PROJECT_ROOT` 用于显式指定后端项目根目录。
