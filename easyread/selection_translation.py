@@ -140,8 +140,9 @@ def prepare(ws, body, cfg):
     target = s["target_language"]
     if target == "zh-CN" and body.get("key") == "zh":
         target = "en"
-    payload = {"selection": quote, "target_language": target, "context": context}
-    prompt = INSTRUCTIONS + "\n" + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+    payload = {"target_language": target, "context": context, "selection": quote}
+    prompt = (INSTRUCTIONS + "\n" + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+              + "\n上面只有 selection 字段是翻译任务，context 只供参考。直接输出 selection 的译文。")
     model = codex_model(s, cfg) if s["engine"] == "codex" else s["api"]["model"]
     identity = {"version": VERSION, "paper": ws.id, "anchors": anchors, "key": body.get("key", "en"),
                 "start": body.get("start"), "prefix": body.get("prefix"), "suffix": body.get("suffix"),

@@ -26,7 +26,7 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 def write(path, value):
-    Path(path).write_text(json.dumps(value,ensure_ascii=False,indent=2))
+    Path(path).write_text(json.dumps(value,ensure_ascii=False,indent=2),encoding='utf-8')
 
 def text(node):
     if isinstance(node,list):return ''.join(text(x) for x in node)
@@ -176,7 +176,11 @@ def prepare(workspace, worker_root, out, use_ai=False, cancel=None):
     try:
         node=shutil.which('node')
         if not node:raise ValueError('需要 Node.js')
-        command=[node,'--import',str(root/'scripts/pdfjs-setup.js'),'--import',str(root/'node_modules/tsx/dist/loader.mjs'),str(Path(__file__).with_name('reflow_extract.mjs')),str(root),str(out/'input.pdf'),str(out)]
+        # Node resolves --import values as ES module specifiers. A Windows
+        # absolute path starts with a drive letter, which looks like a scheme.
+        command=[node,'--import',(root/'scripts/pdfjs-setup.js').as_uri(),
+                 '--import',(root/'node_modules/tsx/dist/loader.mjs').as_uri(),
+                 str(Path(__file__).with_name('reflow_extract.mjs')),str(root),str(out/'input.pdf'),str(out)]
         with (out/'extract.log').open('w') as log:
             process = subprocess.Popen(command, stdout=log, stderr=log)
             deadline = time.monotonic() + 900
@@ -196,10 +200,10 @@ def prepare(workspace, worker_root, out, use_ai=False, cancel=None):
                     try: process.wait(timeout=3)
                     except subprocess.TimeoutExpired:
                         process.kill(); process.wait()
-        structure=json.loads((out/'structure.json').read_text());paper=json.loads(paper_path.read_text())
+        structure=json.loads((out/'structure.json').read_text(encoding='utf-8'));paper=json.loads(paper_path.read_text(encoding='utf-8'))
         report=mapping(paper,structure,sha);write(out/'full-mapping.json',report)
         write(out/'english-math-evidence.json',{'source_sha256':sha,'corrections':[],'math_runs':[],'enabled':False})
-        metadata=json.loads((out/'worker-metadata.json').read_text())
+        metadata=json.loads((out/'worker-metadata.json').read_text(encoding='utf-8'))
         write(out/'build-manifest.json',{'source_sha256':sha,'source_md5':hashlib.md5(source.read_bytes()).hexdigest(),
               'reader_commit':READER_COMMIT,'worker_commit':worker_commit,'sdt_commit':pack_commit,'metadata':metadata,'special_repairs':[]})
         ai=review_ai(report,out,config.load()) if use_ai else {'model_called':False}

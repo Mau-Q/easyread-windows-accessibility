@@ -147,6 +147,10 @@ def handler_for(base,runtime):
                 if write:
                     scope,model=self._ai_operation(path)
                     if scope:
+                        # Consume this POST before returning a consent challenge.
+                        # Otherwise a persistent connection can treat the unread
+                        # body as the start of the next request.
+                        self._body()
                         try:gate=runtime.gate(self.session,scope,model)
                         except Problem as e:
                             if e.status==403:return self._json(403,{'error':str(e),'code':'consent_required','info':runtime.ai_info(scope,model),'scope':scope,'model':model})

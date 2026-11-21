@@ -214,6 +214,14 @@ class AppAccessTests(unittest.TestCase):
             response=conn.getresponse();body=json.loads(response.read());return response.status,body,response.getheader('Set-Cookie')
         status,login,header=post('/api/login',{'username':'alice','password':'test-only-password'});self.assertEqual(200,status)
         csrf=login['csrf'];cookie=header.split(';',1)[0];socket=conn.sock
+        translation='/api/p/'+self.pid+'/selection-translation'
+        status,challenge,_=post(translation,{'quote':'Nonempty selection request awaiting consent'})
+        self.assertEqual(403,status)
+        self.assertEqual('consent_required',challenge['code'])
+        self.assertEqual('selection',challenge['scope'])
+        status,_,_=post('/api/consent',{'scope':'selection','fingerprint':challenge['info']['fingerprint']})
+        self.assertEqual(200,status)
+        self.assertIs(conn.sock,socket)
         self.assertEqual(200,post('/api/editor-state',{'dirty':True})[0])
         for revision,text in enumerate(('first saved note','second saved note')):
             status,saved,_=post('/api/reading/'+self.pid+'/paper-note',{'body':text,'revision':revision})

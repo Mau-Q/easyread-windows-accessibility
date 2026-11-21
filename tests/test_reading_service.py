@@ -73,7 +73,12 @@ class ServiceTests(unittest.TestCase):
 
     def test_invalid_quote_and_incomplete_output_keep_old_report(self):
         self.consent();old=self.run_task()
-        for invalid in (result(quote='This fabricated quote is not in this PDF'),'{"sections":{}}','{"sections":'):
+        self.ai.response='```json\n'+result()+'\n```'
+        old=self.run_task(body={'expected_report':old})
+        self.assertEqual(old,self.ws.state()['report']['id'])
+        for invalid in (result(quote='This fabricated quote is not in this PDF'),
+                        '```json\n'+result(quote='Fabricated fenced citation absent from the PDF')+'\n```',
+                        'Extra output\n'+self.ai.response,'{"sections":{}}','{"sections":'):
             self.ai.response=invalid
             tid=self.run_task(body={'expected_report':old})
             self.assertEqual('failed',self.ws.task(tid)['state'])

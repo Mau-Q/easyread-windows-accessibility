@@ -1,6 +1,6 @@
 # EasyRead：Windows 视障友好适配
 
-本仓库基于已有 EasyRead 软件工程课程项目，已进行 Windows 兼容与视障友好适配，并在本机 Tauri 桌面窗口验证键盘、NVDA 输出和系统高对比度。**本机验证范围、真实 AI/外部运行时及人工验收边界见 [Windows 记录](docs/WINDOWS.md)，不宣称已完成教师最终验收。**
+本仓库基于已有 EasyRead 软件工程课程项目，已进行 Windows 兼容与视障友好适配，并在本机 Tauri 桌面窗口验证键盘、NVDA 输出和系统高对比度。教师验收已按用户提供的状态登记为完成。实际测试与待补测范围见 [Windows 记录](docs/WINDOWS.md)。
 
 应用包含本地文献库、账号隔离、PDF 与网页阅读、分类和搜索、批注与手动笔记、阅读报告及问答等已有功能。此次目标是让这些现有功能可被读屏软件识别、可通过键盘操作，并支持 Windows 系统高对比度；不新增业务功能。
 
@@ -26,7 +26,7 @@
 
 Python 依赖声明在 `pyproject.toml`，要求 Python 3.10+；接手时建议先使用 3.12。前端为原生 HTML/CSS/JS，不需要另建 React/Vue 项目。第三方 `easyread/web/vendor/` 是运行资源，不能作为缓存删除。
 
-Windows 本机已有 Python 234 项管理员整套及新增登录用例定向通过，最终普通权限 235 项中仅符号链接创建受系统权限限制；Node 30 项、Rust 3 项通过，另有实际桌面核心/扩展流程记录。Tauri 和翻译进程管理保留 Unix 分支并增加 Windows 实现。当前 exe 仍依赖源码检出和 Python 虚拟环境，不是完全独立安装器。自动检查、真实 NVDA 输出和人工体验分别记录。
+Windows 本机已通过 Python 235 项管理员回归、Node 30 项和 Rust 3 项。桌面核心流程、NVDA、系统高对比度、本地真实文本模型和 Zotero 重排候选均已实测。Tauri 和翻译进程管理保留 Unix 分支并增加 Windows 实现。当前 exe 依赖源码检出和 Python 虚拟环境。HJFY 的商店引擎启动限制和人工听读范围见 [Windows 记录](docs/WINDOWS.md)。
 
 真实 AI 功能依赖使用者自行配置的服务或本机后端；本仓库不附 API Key、模型账户、个人文献、账号数据库或历史阅读记录。初始验证使用新建测试账号和可公开的测试 PDF，不调用真实付费服务。
 
