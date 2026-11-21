@@ -2,7 +2,7 @@
 
 状态：供审阅的主贴草稿。教师验收已完成（按 2026-11-21 提供的状态登记）。姓名尚未填写，教学平台提交待完成。
 
-我选择 Windows 桌面项目路线，在已有的软件工程课程项目 EasyRead 上做兼容与视障友好适配。项目基于 [Edwardxlai/easyread](https://github.com/Edwardxlai/easyread)，保留 MIT 和第三方许可证；本次工作是原项目的后续改造，不把全部代码称为本人原创。课程仓库：[easyread-windows-accessibility](https://github.com/Mau-Q/easyread-windows-accessibility)。本轮修改尚未推送远端，审阅后需要另行上传，仓库链接当前不能替代本机修改版本。
+我选择 Windows 桌面项目路线，在已有的软件工程课程项目 EasyRead 上做兼容与视障友好适配。项目基于 [Edwardxlai/easyread](https://github.com/Edwardxlai/easyread)，保留 MIT 和第三方许可证；本次工作是原项目的后续改造，不把全部代码称为本人原创。本次适配的源码、测试和文档见 [课程仓库的 Windows 适配分支](https://github.com/Mau-Q/easyread-windows-accessibility/tree/windows-accessibility)。
 
 依据任务书两页和指定《Windows 应用无障碍开发指南》，保留 Python 服务、原生 Web 界面、Tauri 桌面壳及原有文献阅读业务。没有另建应用，没有改成 Android，也没有新增 OCR 或独立语音系统。
 
@@ -14,7 +14,7 @@
 - F6/Shift+F6 往返工具栏、PDF/网页正文和面板；选文后 Shift+F10 调用批注；摘要、批注和报告引用定位后设置正文焦点。
 - 支持系统高对比度颜色、可见焦点，并修复常规主题低对比度文字及低缩放页码不一致。
 
-测试于 2026-11-13 在 Windows x64（10.0.26300）本机进行，使用 Python 3.12.10、Rust/Cargo 1.100.0、Build Tools 2022、WebView2 157.0.4341.46、NVDA 2026.3.1 portable。使用独立数据目录和测试账号，没有接入个人文献。合成两页双栏 PDF、公开 BERT 论文和 arXiv 2411.00640v1 为测试样本。
+测试于 2026-11-13 和 2026-11-21 在 Windows x64（10.0.26300）本机进行，使用 Python 3.12.10、Rust/Cargo 1.100.0、Build Tools 2022、WebView2 157.0.4341.46、NVDA 2026.3.1 portable。使用独立数据目录和测试账号，没有接入个人文献。合成两页双栏 PDF、公开 BERT 论文和 arXiv 2411.00640v1 为测试样本。
 
 实际结果：
 
@@ -33,6 +33,6 @@
 
 本机从仓库根目录运行 `start-desktop.cmd`，默认数据在检出目录下 `runtime/windows-dev`。该版本依赖源码和 Python 环境，未宣称是独立安装包。测试源码和样本生成器随项目提供，实际配置、账号库、截图、原始 NVDA 日志和构建物均不上传。
 
-HJFY 商店包内部引擎受 Windows 启动限制，EasyRead 原生 PDF 翻译待补。复杂文档的人工听读体验待确认。教学平台提交待完成。
+HJFY 商店包内部引擎受 Windows 启动限制，EasyRead 原生 PDF 翻译待补。视觉模型的图片问答和复杂文档的人工听读体验待确认。教学平台提交待完成。
 
-提交前由本人填入姓名、审阅上述真实边界，并将本轮本地修改上传到课程仓库；若补做真实服务或人工听读，按实际结果更新记录后再发主贴。
+提交前填写姓名并核对测试记录。如有补测，按实际结果更新主贴。
