@@ -1,5 +1,7 @@
 # EasyRead 桌面壳
 
+> 这是适配前的源码记录。查看 [最新 Windows 开发与测试说明](https://github.com/Mau-Q/easyread-windows-accessibility/blob/windows-accessibility/docs/WINDOWS.md)。
+
 现有实现使用 Tauri 窗口与菜单，启动同一 Python 服务，加载原文献库与阅读器。当前构建配置和脚本面向 macOS，**尚未在 Windows 构建或运行验证**。
 
 Windows 接手请先阅读 [交接说明](../HANDOFF.md)和 [Windows 开发说明](../docs/WINDOWS.md)。需检查 Python 环境路径、Unix 进程组、外部打开操作、菜单快捷键、窗口生命周期和 Windows 构建目标。

@@ -1,5 +1,7 @@
 # Windows 开发与验证
 
+> 这是适配前的源码记录。查看 [最新 Windows 开发与测试说明](https://github.com/Mau-Q/easyread-windows-accessibility/blob/windows-accessibility/docs/WINDOWS.md)。
+
 ## 当前状态
 
 截至 2026-11-13，此公开仓库只完成源码整理与交接准备。已有 `start.cmd`，不等于当前全部功能已经在 Windows 验证。
