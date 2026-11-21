@@ -1,10 +1,10 @@
 # Windows 开发与验证
 
-更新于 2026-11-21。按任务书选择 Windows 桌面路线，保留 Python、原生 Web、Tauri 和已有业务。教师验收已按用户提供的状态登记。下文记录本机兼容与无障碍验证，以及真实模型、重排 worker 和 HJFY 的补测结果。
+最近一次 Windows 测试于 2026-11-21 完成。适配沿用原有 Python 服务、Web 界面和 Tauri 桌面壳。本页记录测试环境、操作步骤和结果。
 
-## 接收与规范
+## 任务书与参考指南
 
-仓库为 <https://github.com/Mau-Q/easyread-windows-accessibility>，初始提交 `c1a771877af0a4f854cc4a4a01ec3149e7bbf34c`，初始工作区干净；开发分支 `windows-accessibility`。已读 AGENTS、README、HANDOFF、原 WINDOWS、PUBLICATION 和完整两页任务书。原件 SHA-256 为 `a238fa3009452467796b22cf582635921cc82999bc505cd0586bd75c8b98005e`，核对一致，未修改原件。
+适配依据 [课程任务书](assignment/揭榜任务2-无障碍适配任务书.pdf)。任务书核对记录见 [公开整理记录](PUBLICATION.md)。
 
 指定指南从 [NVDA 中文网开发文档](https://nvdacn.com/index.php/devDocs.html)取得。[原 PDF](https://cdn1.ime.sogou.com/Windows%E5%BA%94%E7%94%A8%E6%97%A0%E9%9A%9C%E7%A2%8D%E5%BC%80%E5%8F%91%E6%8C%87%E5%8D%971.0.pdf)封面为《Windows 应用无障碍开发指南》，正文使用完整的“Windows 应用无障碍可访问性开发指南”名称，共 43 页。发起方为腾讯搜狗输入法、阳光读屏，参与方含争渡读屏、NVDA 中文网和上海有人公益基金会。按第 4 章检查名称/角色/状态、导航键盘和系统高对比度；[大会同期报道](https://static.nfnews.com/content/202206/16/c6593256.html)用于核对 2022 年背景。[Microsoft 清单](https://learn.microsoft.com/en-us/windows/apps/design/accessibility/accessibility-checklist)和[最佳实践](https://learn.microsoft.com/en-us/windows/win32/winauto/accessibility-best-practices)仅作补充。指南本地留存，没有改授 MIT 许可。
 
@@ -24,7 +24,7 @@
 | 读屏 | NVDA 2026.3.1 portable，中文界面，Windows OneCore，禁用插件 |
 | 自动检查 | Playwright 1.65.0、axe-core 4.14.0，tests/package-lock.json 锁定 |
 
-检出目录 `D:\SE\easyread-windows-accessibility`；数据 `D:\SE\easyread-validation`；证据 `D:\SE\evidence`。使用新测试账号、合成内容与公开论文；未接入原个人库。配置引擎为 none、关闭自动翻译；所有 AI 状态测试均标注 fixture。
+检出目录 `D:\SE\easyread-windows-accessibility`；数据 `D:\SE\easyread-validation`；证据 `D:\SE\evidence`。使用新测试账号、合成内容与公开论文；未接入原个人库。首轮关闭自动翻译，使用预设模型响应测试异常流程。后续补测使用独立的本地文本模型和视觉模型。
 
 按用户要求，缓存、临时目录、Rust 和 Build Tools 主体尽可能放 D 盘。Build Tools 提供 Rust 桌面构建所需链接器及 Windows SDK，不需要完整 Visual Studio IDE。Windows 必需的系统共享组件没有手工搬移；磁盘审计与迁移证据留在项目外。
 
@@ -75,29 +75,29 @@ $env:PYTHONUTF8 = '1'
 
 ## 现有功能与验证范围
 
-`TOOL_OBSERVED` 表示实际工具观察；AI fixture、真实后端、读屏日志、人工确认、教师验收分别记录。
+下表记录了 Windows 桌面上的实际结果和各项测试使用的样本。报告和问答的正常流程使用本地模型，错误恢复使用预设响应。
 
 | 入口/要求 | 实际操作及结果 | 范围 |
 |---|---|---|
-| 注册/登录/隔离 | 新目录新账号，重启后登录；跨账号权限回归 | TOOL_OBSERVED，桌面和真实本地后端 |
-| PDF 导入 | 键盘打开系统文件框，输入 BERT 路径并 Enter；另运行自动注入样本核心流程 | TOOL_OBSERVED，真实系统选择与 setInputFiles 分开记录 |
-| 中文搜索/选中/元数据 | 编辑中文题名、搜索、方向键/首尾，active-descendant 对应实际行 | TOOL_OBSERVED，核心流程 + CR-001 |
-| 分类/星标/状态/侧栏 | 新建/改名/分配/删除分类且保留文献，切换星标和状态，键盘调整宽度 | TOOL_OBSERVED，extended 真实持久化 |
-| 菜单/引用/文件入口 | Shift+F10、方向键、Escape、恢复；保留复制格式、外链、文件夹、导出入口 | TOOL_OBSERVED 菜单与元数据；格式/权限由既有回归覆盖，未声称逐格式人工核对剪贴板 |
-| 删除论文 | 专用合成副本先取消保留，再确认永久删除 | TOOL_OBSERVED，remaining 真实后端 |
-| 全部设置/模型名单 | 六个设置页；新增、默认、修改、删除草稿模型，最终取消设置 | TOOL_OBSERVED，无实际 Key 或提供商调用 |
-| PDF 阅读/布局 | F6 进入正文，页码、前后页、同步、缩放、原文/译文/并排、分栏键盘宽度 | TOOL_OBSERVED；译文使用本地合成产物，不证明翻译质量 |
-| 双栏实际读屏 | NVDA+Down 完整读取合成样本两页。BERT 补测从首页进入连续阅读，语音日志覆盖摘要、引言及相关工作 | TOOL_OBSERVED。复杂公式、表格和全文的人体验证待补 |
-| 笔记/批注/定位 | 整篇笔记手动保存，Shift+F10 划线、编辑批注，引用聚焦正文 | TOOL_OBSERVED；选区位置用受控 DOM Range 建立，后续键盘操作与真实保存 |
-| 保存错误恢复 | 一次受控 503，草稿保留，取消离开，重试实际保存 | TOOL_OBSERVED，故障 fixture + 真实恢复 |
-| 报告 | 失败、重试、只保存不重新生成、引用跳转。真实模型生成四栏报告并保存，引用可定位到原 PDF 第 1 页 | TOOL_OBSERVED。恢复分支用 fixture 覆盖 |
-| 问答/会话 | 失败保留输入和引用、流式完成、仅保存、中断、改名/选择/取消删除/确认删除。真实模型的带引用问答和 PDF 聊天已保存 | TOOL_OBSERVED。恢复分支用 fixture 覆盖。图片问答的真实视觉模型待补 |
-| 选词翻译 | 公开 arXiv 网页的一处部分选区通过授权确认、流式请求和结果返回。调整提示后只翻译所选句段 | TOOL_OBSERVED。同一连接中确认授权的回归已通过 |
-| 历史记录/下载 | 打开/关闭恢复焦点，真实另存为输入 D 盘路径，落盘 JSON 可解析 | TOOL_OBSERVED，原始 CDP + 系统键盘保存框 |
-| arXiv 网页 | 实际导入 2411.00640v1；F6、摘要焦点、Shift+F10 划线持久化、笔记返回 | TOOL_OBSERVED，公开网络源与真实本地存储 |
-| 高对比度/低视力 | 200% 缩放可达；Windows 夜空主题下文字/边框/选中/焦点，原生 forced-colors | TOOL_OBSERVED，实际系统主题，测试后恢复 |
-| 生命周期 | 重复启动、关闭及所启动 Python/WebView2 树清理；未保存笔记退出提示中键盘选“否”，草稿保留再手动保存 | TOOL_OBSERVED，无所属后台残留，不终止其他应用 |
-| 重排 worker | 原版 Zotero worker 真实生成结构、SDT 包和候选证明，合成两页 20 段全部匹配 | TOOL_OBSERVED，本轮验证候选生成。候选仍为 preview |
+| 注册/登录/隔离 | 新目录新账号，重启后登录；跨账号权限回归 | 桌面和真实本地后端 |
+| PDF 导入 | 键盘打开系统文件框，输入 BERT 路径并 Enter；另运行自动注入样本核心流程 | 真实系统选择与 setInputFiles 分开记录 |
+| 中文搜索/选中/元数据 | 编辑中文题名、搜索、方向键/首尾，active-descendant 对应实际行 | 核心流程 + CR-001 |
+| 分类/星标/状态/侧栏 | 新建/改名/分配/删除分类且保留文献，切换星标和状态，键盘调整宽度 | 核对本地保存结果 |
+| 菜单/引用/文件入口 | Shift+F10、方向键、Escape、恢复；保留复制格式、外链、文件夹、导出入口 |  菜单与元数据；格式/权限由既有回归覆盖，未声称逐格式人工核对剪贴板 |
+| 删除论文 | 专用合成副本先取消保留，再确认永久删除 | 本地后端 |
+| 全部设置/模型名单 | 六个设置页；新增、默认、修改、删除草稿模型，最终取消设置 | 无实际 Key 或提供商调用 |
+| PDF 阅读/布局 | F6 进入正文，页码、前后页、同步、缩放、原文/译文/并排、分栏键盘宽度 | 译文使用本地合成产物，不证明翻译质量 |
+| 双栏实际读屏 | NVDA+Down 完整读取合成样本两页。BERT 补测从首页进入连续阅读，语音日志覆盖摘要、引言及相关工作 | 复杂公式、表格和全文的人工听读待补 |
+| 笔记/批注/定位 | 整篇笔记手动保存，Shift+F10 划线、编辑批注，引用聚焦正文 | 选区位置用受控 DOM Range 建立，后续键盘操作与真实保存 |
+| 保存错误恢复 | 一次受控 503，草稿保留，取消离开，重试实际保存 | 用预设错误响应触发，重试后确认实际保存 |
+| 报告 | 失败、重试、只保存不重新生成、引用跳转。真实模型生成四栏报告并保存，引用可定位到原 PDF 第 1 页 | 错误恢复用预设响应测试 |
+| 问答/会话 | 失败保留输入和引用、流式完成、仅保存、中断、改名/选择/取消删除/确认删除。真实模型的带引用问答和 PDF 聊天已保存 | 错误恢复用预设响应测试。图片问答用本地视觉模型验证了附件上传、识别和会话保存 |
+| 选词翻译 | 公开 arXiv 网页的一处部分选区通过授权确认、流式请求和结果返回。调整提示后只翻译所选句段 | 同一连接中确认授权的回归已通过 |
+| 历史记录/下载 | 打开/关闭恢复焦点，真实另存为输入 D 盘路径，落盘 JSON 可解析 | 原始 CDP + 系统键盘保存框 |
+| arXiv 网页 | 实际导入 2411.00640v1；F6、摘要焦点、Shift+F10 划线持久化、笔记返回 | 公开网络源与真实本地存储 |
+| 高对比度/低视力 | 200% 缩放可达；Windows 夜空主题下文字/边框/选中/焦点，原生 forced-colors | 实际系统主题，测试后恢复 |
+| 生命周期 | 重复启动、关闭及所启动 Python/WebView2 树清理；未保存笔记退出提示中键盘选“否”，草稿保留再手动保存 | 无所属后台残留，不终止其他应用 |
+| 重排 worker | 原版 Zotero worker 真实生成结构、SDT 包和候选证明，合成两页 20 段全部匹配 | 本轮验证候选生成。候选仍在预览入口 |
 | HJFY | 本机测试了官方 Windows 商店包 1.0.6.0 的引擎发现和实际启动 | 内部 `hjfy-pdf.exe` 出现 Windows 拒绝访问，原生翻译产物待有可独立启动的发行版后补测。取消/失败/产物身份由受控引擎回归覆盖 |
 | 旧阅读/实验路径 | 上游已停用旧实验并重定向/410，历史文件和记录保留 | 本轮覆盖原有重排候选准备命令 |
 
@@ -179,11 +179,12 @@ axe 检查文献库、导入、六个设置页、PDF、笔记共 10 个状态的
 ## 11 月 21 日补测复现与清理
 
 - **本地真实模型。** 在 D 盘用 llama.cpp b10922 加载 Qwen2.5-1.5B-Instruct Q4_K_M，启动 `llama-server --host 127.0.0.1 --port 18089 --ctx-size 4096`，以一次性密钥限制访问。模型地址为 `http://127.0.0.1:18089/v1`。在独立 EasyRead 数据目录配置报告、聊天和选词翻译，导入四句合成 PDF，分别经授权起报告、问答和 PDF 聊天，再导入 arXiv `2411.00640v1` 测部分选区。真实问答与聊天正确返回 10 份文档，报告和问答的引用端点返回第 1 页，选词结果只翻译选中片段。复现脚本和结果位于本机 `D:\SE\evidence\2026-11-21\probe_local_model.py` 和 `real-model-results.json`。测试结束后删除权重、临时推理程序、下载包和临时配置，确认端口已关闭。[llama.cpp 构建](https://github.com/ggml-org/llama.cpp/releases/tag/b10922) · [Qwen 发布权重](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/blob/main/qwen2.5-1.5b-instruct-q4_k_m.gguf)
+- **图片问答。** 用 llama.cpp b10922 在本机加载 SmolVLM-256M-Instruct Q8_0 和配套图像投影文件。模型只监听 127.0.0.1，EasyRead 使用独立账号和本地模型地址。导入合成 PDF 后，通过 PDF 问答接口上传两张不同颜色的 384 × 384 PNG，对两张图使用同一个颜色问题。模型分别答出 red 和 blue，两次流式响应均完成，图片和回答均保存在会话中。此轮验证的是服务接口和简单图像识别。复测脚本和结果保存在本机日志目录。[下载模型与投影文件](https://huggingface.co/ggml-org/SmolVLM-256M-Instruct-GGUF/tree/b9e4379)
 - **真实重排。** 在 D 盘取项目锁定的 Zotero document-worker `9d11471391fc3f609a0d1e7012b82b9be6ca9c12` 与子模块并执行 `npm ci`。webpack 生成 worker 后，按上游 `scripts/build-assets` 用 PowerShell 复制所需资源，再执行上游 metadata 和 SDT 打包命令。用 `python -m easyread.reflow_prepare --workspace <合成文献目录> --worker-root <worker目录> --out <新目录>` 运行。`reflow-retest/full-mapping.json` 记录 20 段已匹配、0 段待确认。`cache-proof.json` 记录原文件和输出指纹。[Zotero 源码](https://github.com/zotero/document-worker/tree/9d11471391fc3f609a0d1e7012b82b9be6ca9c12)
 - **HJFY Windows 商店包。** 安装后定位到 `Engines/Pdf/bin/hjfy-pdf.exe`。直接执行 `--help` 返回访问被拒绝，普通文件复制返回无法加密指定文件，未取得可独立使用的运行时。测试安装包位于 WindowsApps，已按用户要求卸载该版本并清理未完成的 D 盘副本。需要有官方可独立调用的 Windows 运行时才能完成 EasyRead 的原生 PDF 翻译联调。[Microsoft Store](https://apps.microsoft.com/detail/9pffshldt311)
 - **真实 NVDA 补测。** 使用与首轮相同的 NVDA portable 和受控桌面数据，对 BERT 执行原生键盘 `Ctrl+Home`、`NVDA+Down`，采集 50 秒语音日志并检查章节标记，摘要、引言和相关工作均出现。可分享的布尔摘要位于 `nvda-bert-summary.json`，原始日志仍为私有证据。
 
-## 证据与完成边界
+## 测试日志
 
 本机 `D:\SE\evidence` 保存 python-final.txt、node-final.txt、cargo-check-final.txt、cargo-test-final.txt、desktop-build-final.txt、native-final-core.txt、native-final-extended.txt、native-final-chat.txt、native-remaining-final.txt、native-html-final.txt、native-final-axe/、real-system-contrast.json 和私有 NVDA 日志。源码只留脱敏说明、测试和生成器，不提交配置、数据库、截图、原始日志或构建物。
 
@@ -191,8 +192,8 @@ axe 检查文献库、导入、六个设置页、PDF、笔记共 10 个状态的
 
 提交检查：`python scripts/check_public_tree.py`、Gitleaks 8.30.1 的受检文件副本和 Git 历史扫描（redact=100）、git diff --check 和暂存清单复核。既有精确第三方例外不扩大。GitHub Actions 仍为原账单阻塞运行，9 个作业没有测试步骤；没有改账单/反复触发，云端不计通过。
 
-剩余外部验收条件：
+## 待补测与提交状态
 
-- **HJFY 原生 PDF 翻译及视觉模型图片问答仍待补。** 官方商店引擎无法从 EasyRead 启动。本地文本模型已验证报告、问答和选词翻译，图片问答需另有真实视觉模型。
+- **HJFY 原生 PDF 翻译。** 官方商店引擎无法从 EasyRead 启动。需要可独立调用的 Windows 引擎复测翻译、生成和打开译文。
 - **人工听读体验仍待补。** 合成样本和 BERT 已观察到实际 NVDA 语音输出。全篇复杂表格、公式和目标用户的主观听读体验需真实使用者确认。
-- **教师验收：已完成（按用户于 2026-11-21 提供的状态登记）。** 教学平台提交仍待完成，主贴保留在本地草稿中。
+- **课程提交。** 教师验收已登记为完成（2026-11-21）。教学平台主贴待发布。
