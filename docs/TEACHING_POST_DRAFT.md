@@ -34,4 +34,4 @@
 
 从仓库根目录运行 `start-desktop.cmd`，默认数据在检出目录下 `runtime/windows-dev`。桌面程序依赖源码和 Python 环境。仓库提供测试脚本和样本生成器。
 
-当前读屏记录覆盖合成双栏样本和 BERT 的部分章节。复杂公式、表格和长文仍需人工听读。HJFY 原生 PDF 翻译需要可独立启动的 Windows 引擎。
+Windows 读屏测试已完成。NVDA 读完两页双栏样本的 20 段正文，BERT 的朗读记录覆盖摘要、引言和相关工作。HJFY 幻觉翻译已在 Mac 上完成测试。Windows 商店版引擎启动时返回访问被拒绝。

@@ -26,7 +26,7 @@
 
 Python 依赖声明在 `pyproject.toml`，要求 Python 3.10+；接手时建议先使用 3.12。前端为原生 HTML/CSS/JS，不需要另建 React/Vue 项目。第三方 `easyread/web/vendor/` 是运行资源，不能作为缓存删除。
 
-Windows 本机已通过 Python 235 项管理员回归、Node 30 项和 Rust 3 项。桌面核心流程、NVDA、系统高对比度、本地真实文本模型和 Zotero 重排候选均已实测。Tauri 和翻译进程管理保留 Unix 分支并增加 Windows 实现。当前 exe 依赖源码检出和 Python 虚拟环境。HJFY 和其他补测条件见 [Windows 测试记录](docs/WINDOWS.md#待补测与提交状态)。
+Windows 本机已通过 Python 235 项管理员回归、Node 30 项和 Rust 3 项。桌面核心流程、NVDA、系统高对比度、本地真实文本模型和 Zotero 重排候选均已实测。Tauri 和翻译进程管理保留 Unix 分支并增加 Windows 实现。当前 exe 依赖源码检出和 Python 虚拟环境。读屏测试已完成。HJFY 的 macOS 测试状态和 Windows 启动结果见 [测试记录](docs/WINDOWS.md#测试与提交状态)。
 
 真实 AI 功能依赖使用者自行配置的服务或本机后端；本仓库不附 API Key、模型账户、个人文献、账号数据库或历史阅读记录。初始验证使用新建测试账号和可公开的测试 PDF，不调用真实付费服务。
 

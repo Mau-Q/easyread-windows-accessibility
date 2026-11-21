@@ -46,7 +46,7 @@ cd ..
 
 `start-desktop.cmd` 默认使用检出目录下 `runtime\windows-dev`，WebView2 profile 默认也在该数据目录下，检出在 D 盘时这些数据都在 D 盘。仅首次复制 config.example.json，不覆盖已有配置。可先设置独立 `EASYREAD_HOME`；已有显式 WEBVIEW2_USER_DATA_FOLDER 会保留。首次注册再登录；退出后重复运行同一脚本。日常启动不启用调试端口。
 
-当前是依赖源码和 Python 环境的本机桌面版本。`npm run build` 使用 `--no-bundle`，exe 不能冒充完全独立的安装包。macOS 的 `npm run build:mac` 保留，Unix 分支保留；本轮没有运行 Mac/Linux 回归。
+当前是依赖源码和 Python 环境的本机桌面版本。`npm run build` 使用 `--no-bundle`，exe 不能冒充完全独立的安装包。macOS 的 `npm run build:mac` 保留，Unix 分支保留；本轮完整回归在 Windows 执行。macOS 的 HJFY 测试见下文。
 
 仅需浏览器诊断时：
 
@@ -87,7 +87,7 @@ $env:PYTHONUTF8 = '1'
 | 删除论文 | 专用合成副本先取消保留，再确认永久删除 | 本地后端 |
 | 全部设置/模型名单 | 六个设置页；新增、默认、修改、删除草稿模型，最终取消设置 | 无实际 Key 或提供商调用 |
 | PDF 阅读/布局 | F6 进入正文，页码、前后页、同步、缩放、原文/译文/并排、分栏键盘宽度 | 译文使用本地合成产物，不证明翻译质量 |
-| 双栏实际读屏 | NVDA+Down 完整读取合成样本两页。BERT 补测从首页进入连续阅读，语音日志覆盖摘要、引言及相关工作 | 复杂公式、表格和全文的人工听读待补 |
+| 双栏实际读屏 | NVDA+Down 完整读取合成样本两页。BERT 补测从首页进入连续阅读，语音日志覆盖摘要、引言及相关工作 | 读屏测试完成，实测范围为上述样本 |
 | 笔记/批注/定位 | 整篇笔记手动保存，Shift+F10 划线、编辑批注，引用聚焦正文 | 选区位置用受控 DOM Range 建立，后续键盘操作与真实保存 |
 | 保存错误恢复 | 一次受控 503，草稿保留，取消离开，重试实际保存 | 用预设错误响应触发，重试后确认实际保存 |
 | 报告 | 失败、重试、只保存不重新生成、引用跳转。真实模型生成四栏报告并保存，引用可定位到原 PDF 第 1 页 | 错误恢复用预设响应测试 |
@@ -151,7 +151,7 @@ axe 检查文献库、导入、六个设置页、PDF、笔记共 10 个状态的
 .\tests\nvda_reading.ps1 -Nvda D:\DevTools\NVDA-2026.3.1\nvda.exe -Config D:\SE\easyread-validation\nvda-config -PrivateLog D:\SE\evidence\nvda-private.log -Title 双栏无障碍 -Seconds 48
 ```
 
-实际日志观察到设置按钮的名称/角色，合成两页共 20 段，逐页完整 LEFT 1–5 → RIGHT 1–5，顺序核对通过。可运行 `python scripts/check_nvda_sample.py PRIVATE_LOG`，只输出合成标记摘要并检查实际 say-all 输入。公开 BERT 已进入正文并连续朗读开头。长论文整篇、公式表格及主观听读舒适度未据此宣称通过。原始日志可能含桌面其他内容，必须仅本地保留，不提交。
+实际日志观察到设置按钮的名称/角色，合成两页共 20 段，逐页完整 LEFT 1–5 → RIGHT 1–5，顺序核对通过。可运行 `python scripts/check_nvda_sample.py PRIVATE_LOG`，只输出合成标记摘要并检查实际 say-all 输入。读屏测试已完成。BERT 样本的连续朗读记录覆盖摘要、引言和相关工作。原始日志可能含桌面其他内容，必须仅本地保留，不提交。
 
 系统对比度使用 Windows 设置中的“夜空”并真正应用，核对 hc2.theme 和原生 WebView2 forced-colors，清除 Playwright 默认媒体覆盖，再检查画面。只改注册表标志位、普通深色或媒体模拟均不算通过。用户也已回复“已开启”。测试后恢复原 Custom.theme 与原对比度关闭状态。
 
@@ -192,8 +192,8 @@ axe 检查文献库、导入、六个设置页、PDF、笔记共 10 个状态的
 
 提交检查：`python scripts/check_public_tree.py`、Gitleaks 8.30.1 的受检文件副本和 Git 历史扫描（redact=100）、git diff --check 和暂存清单复核。既有精确第三方例外不扩大。GitHub Actions 仍为原账单阻塞运行，9 个作业没有测试步骤；没有改账单/反复触发，云端不计通过。
 
-## 待补测与提交状态
+## 测试与提交状态
 
-- **HJFY 原生 PDF 翻译。** 官方商店引擎无法从 EasyRead 启动。需要可独立调用的 Windows 引擎复测翻译、生成和打开译文。
-- **人工听读体验仍待补。** 合成样本和 BERT 已观察到实际 NVDA 语音输出。全篇复杂表格、公式和目标用户的主观听读体验需真实使用者确认。
+- **HJFY 幻觉翻译。** macOS 测试已完成，由用户确认。Windows 实测记录为商店版内置引擎启动时返回访问被拒绝。
+- **Windows 读屏测试已完成。** NVDA 日志覆盖两页双栏合成样本的 20 段正文，以及 BERT 样本的摘要、引言和相关工作。
 - **课程提交。** 教师验收已登记为完成（2026-11-21）。教学平台主贴待发布。
